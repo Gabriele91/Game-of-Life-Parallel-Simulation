@@ -8,10 +8,20 @@
 
 #include <iostream>
 #include <grid.h>
+#include <rak_listener.h>
+#include <server_gol.h>
 
 int main(int argc, const char * argv[])
 {
     
+    //alloc server
+    server_gol server{ {4,4}, 2 };
+    //init
+    server.open(3456, 3000);
+    //start loop server
+    server.loop();
+    
+    /*
     grid l_grid({0,0},{8,8});
     //set points
                      l_grid(1,0) = 1;
@@ -33,6 +43,6 @@ int main(int argc, const char * argv[])
 	auto e_h_18 = l_grid.get_history_edges(18);
 	auto e_h_19 = l_grid.get_history_edges(19);
 	auto e_h_20 = l_grid.get_history_edges(20);
-    
+    */
     return 0;
 }

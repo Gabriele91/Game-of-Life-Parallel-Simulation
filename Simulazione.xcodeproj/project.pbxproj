@@ -186,6 +186,8 @@
 		E094D11F1C5D013700732362 /* gettimeofday.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gettimeofday.h; sourceTree = "<group>"; };
 		E094D1BE1C5D018F00732362 /* libRakNetLibStatic.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libRakNetLibStatic.a; sourceTree = "<group>"; };
 		E094D1BF1C5D018F00732362 /* libRakNetLibStatic_D.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libRakNetLibStatic_D.a; sourceTree = "<group>"; };
+		E094D1C21C5D042E00732362 /* server_gol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = server_gol.h; sourceTree = "<group>"; };
+		E094D1C31C5D134100732362 /* messages.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = messages.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,6 +234,8 @@
 				E094CFE21C5CFFFE00732362 /* grid.h */,
 				E094CFE31C5CFFFE00732362 /* point.h */,
 				E094CFE41C5CFFFE00732362 /* rak_listener.h */,
+				E094D1C21C5D042E00732362 /* server_gol.h */,
+				E094D1C31C5D134100732362 /* messages.h */,
 			);
 			path = include;
 			sourceTree = "<group>";

@@ -1,5 +1,5 @@
 //
-//  RakListener.h
+//  rak_listener.h
 //  BallsWars
 //
 //  Created by Gabriele Di Bari on 14/08/15.
@@ -164,8 +164,8 @@ public:
         
     //open connection
     void open(unsigned short port,
-                double timeOut,
-                int maximumIncomingConnections);
+              double time_out,
+              int maximumIncomingConnections);
     //close connection
     void close();
     //safe close
@@ -215,12 +215,16 @@ public:
     void send(client& client,const bit_stream& stream,
                 PacketReliability type = PacketReliability::RELIABLE_ORDERED);
     //send T message (by uid)
-    template < class T > void send(UID client,const T& msg,PacketReliability type)
+    template < class T > void send(UID client,
+                                   const T& msg,
+                                   PacketReliability type = PacketReliability::RELIABLE_ORDERED)
     {
         send(client,&msg,sizeof(T),type);
     }
     //send T message (by object)
-    template < class T > void send(client& client,const T& msg,PacketReliability type)
+    template < class T > void send(client& client,
+                                   const T& msg,
+                                   PacketReliability type = PacketReliability::RELIABLE_ORDERED)
     {
         send(client,&msg,sizeof(T),type);
     }
