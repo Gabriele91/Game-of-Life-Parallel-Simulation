@@ -22,34 +22,13 @@
 *.dylib*
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
+#*.lai
+#*.la
+#*.a
 
 #codeblocks
 *.layout
 
-#android old
-#AndroidProject/ant.properties
-#AndroidProject/debug.keystore
-#AndroidProject/local.properties
-#AndroidProject/libs*/
-#AndroidProject/bin*/
-#AndroidProject/Android*/
-#AndroidProject/*.sdf
-#AndroidProject/*.suo
-#AndroidProject/*.user
-
-#android new
-Android/ant.properties
-Android/debug.keystore
-Android/local.properties
-Android/libs*/
-Android/bin*/
-Android/Android*/
-Android/*.sdf
-Android/*.suo
-Android/*.user
 
 #Visual Studio files
 *.[Oo]bj
@@ -68,14 +47,13 @@ Android/*.user
 *.[Cc]ache
 *.ilk
 *.log
-*.lib
+#*.lib
 *.sbr
 *.sdf
 *.opensdf
 *.unsuccessfulbuild
 ipch/
 obj/
-[Bb]in
 [Dd]ebug*/
 [Rr]elease*/
 Ankh.NoLoad
