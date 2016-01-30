@@ -17,7 +17,7 @@ int main(int argc, const char * argv[])
     //alloc server
     server_gol server{ {4,4}, 2 };
     //init
-    server.open(3456, 3000);
+    server.open(3456, 10000);
     //start loop server
     server.loop();
     

@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E094CFDF1C5CFFF700732362 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094CFDD1C5CFFF700732362 /* main.cpp */; };
+		E094CFDF1C5CFFF700732362 /* main_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094CFDD1C5CFFF700732362 /* main_server.cpp */; };
 		E094CFE01C5CFFF700732362 /* rak_listener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094CFDE1C5CFFF700732362 /* rak_listener.cpp */; };
+		E094D1C61C5D1D3300732362 /* rak_listener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094CFDE1C5CFFF700732362 /* rak_listener.cpp */; };
+		E094D1D01C5D1D7B00732362 /* main_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094D1CE1C5D1D7600732362 /* main_client.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -21,11 +23,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		E094D1C91C5D1D3300732362 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		E021842C1C5CB031005B3FC6 /* Simulazione */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Simulazione; sourceTree = BUILT_PRODUCTS_DIR; };
-		E094CFDD1C5CFFF700732362 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		E021842C1C5CB031005B3FC6 /* Simulazione-Server */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Simulazione-Server"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E094CFDD1C5CFFF700732362 /* main_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_server.cpp; sourceTree = "<group>"; };
 		E094CFDE1C5CFFF700732362 /* rak_listener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rak_listener.cpp; sourceTree = "<group>"; };
 		E094CFE21C5CFFFE00732362 /* grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = grid.h; sourceTree = "<group>"; };
 		E094CFE31C5CFFFE00732362 /* point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = point.h; sourceTree = "<group>"; };
@@ -188,10 +199,20 @@
 		E094D1BF1C5D018F00732362 /* libRakNetLibStatic_D.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libRakNetLibStatic_D.a; sourceTree = "<group>"; };
 		E094D1C21C5D042E00732362 /* server_gol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = server_gol.h; sourceTree = "<group>"; };
 		E094D1C31C5D134100732362 /* messages.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = messages.h; sourceTree = "<group>"; };
+		E094D1CD1C5D1D3300732362 /* Simulazione-Client */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Simulazione-Client"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E094D1CE1C5D1D7600732362 /* main_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_client.cpp; sourceTree = "<group>"; };
+		E094D1D11C5D1E0600732362 /* client_gol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = client_gol.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E02184291C5CB031005B3FC6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E094D1C81C5D1D3300732362 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -214,7 +235,8 @@
 		E021842D1C5CB031005B3FC6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E021842C1C5CB031005B3FC6 /* Simulazione */,
+				E021842C1C5CB031005B3FC6 /* Simulazione-Server */,
+				E094D1CD1C5D1D3300732362 /* Simulazione-Client */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -222,7 +244,8 @@
 		E094CFDC1C5CFFF700732362 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				E094CFDD1C5CFFF700732362 /* main.cpp */,
+				E094CFDD1C5CFFF700732362 /* main_server.cpp */,
+				E094D1CE1C5D1D7600732362 /* main_client.cpp */,
 				E094CFDE1C5CFFF700732362 /* rak_listener.cpp */,
 			);
 			path = src;
@@ -235,6 +258,7 @@
 				E094CFE31C5CFFFE00732362 /* point.h */,
 				E094CFE41C5CFFFE00732362 /* rak_listener.h */,
 				E094D1C21C5D042E00732362 /* server_gol.h */,
+				E094D1D11C5D1E0600732362 /* client_gol.h */,
 				E094D1C31C5D134100732362 /* messages.h */,
 			);
 			path = include;
@@ -438,9 +462,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E021842B1C5CB031005B3FC6 /* Simulazione */ = {
+		E021842B1C5CB031005B3FC6 /* Simulazione-Server */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E02184331C5CB031005B3FC6 /* Build configuration list for PBXNativeTarget "Simulazione" */;
+			buildConfigurationList = E02184331C5CB031005B3FC6 /* Build configuration list for PBXNativeTarget "Simulazione-Server" */;
 			buildPhases = (
 				E02184281C5CB031005B3FC6 /* Sources */,
 				E02184291C5CB031005B3FC6 /* Frameworks */,
@@ -450,9 +474,26 @@
 			);
 			dependencies = (
 			);
-			name = Simulazione;
+			name = "Simulazione-Server";
 			productName = Simulazione;
-			productReference = E021842C1C5CB031005B3FC6 /* Simulazione */;
+			productReference = E021842C1C5CB031005B3FC6 /* Simulazione-Server */;
+			productType = "com.apple.product-type.tool";
+		};
+		E094D1C41C5D1D3300732362 /* Simulazione-Client */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E094D1CA1C5D1D3300732362 /* Build configuration list for PBXNativeTarget "Simulazione-Client" */;
+			buildPhases = (
+				E094D1C51C5D1D3300732362 /* Sources */,
+				E094D1C81C5D1D3300732362 /* Frameworks */,
+				E094D1C91C5D1D3300732362 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Simulazione-Client";
+			productName = Simulazione;
+			productReference = E094D1CD1C5D1D3300732362 /* Simulazione-Client */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -481,7 +522,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E021842B1C5CB031005B3FC6 /* Simulazione */,
+				E021842B1C5CB031005B3FC6 /* Simulazione-Server */,
+				E094D1C41C5D1D3300732362 /* Simulazione-Client */,
 			);
 		};
 /* End PBXProject section */
@@ -492,7 +534,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				E094CFE01C5CFFF700732362 /* rak_listener.cpp in Sources */,
-				E094CFDF1C5CFFF700732362 /* main.cpp in Sources */,
+				E094CFDF1C5CFFF700732362 /* main_server.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E094D1C51C5D1D3300732362 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E094D1C61C5D1D3300732362 /* rak_listener.cpp in Sources */,
+				E094D1D01C5D1D7B00732362 /* main_client.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,6 +661,38 @@
 			};
 			name = Release;
 		};
+		E094D1CB1C5D1D3300732362 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/include",
+					"$(SOURCE_ROOT)/dependencies/osx/include/**",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/dependencies/osx/lib",
+				);
+				OTHER_LDFLAGS = "-lRakNetLibStatic_D";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E094D1CC1C5D1D3300732362 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/include",
+					"$(SOURCE_ROOT)/dependencies/osx/include/**",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/dependencies/osx/lib",
+				);
+				OTHER_LDFLAGS = "-lRakNetLibStatic";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -622,11 +705,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E02184331C5CB031005B3FC6 /* Build configuration list for PBXNativeTarget "Simulazione" */ = {
+		E02184331C5CB031005B3FC6 /* Build configuration list for PBXNativeTarget "Simulazione-Server" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E02184341C5CB031005B3FC6 /* Debug */,
 				E02184351C5CB031005B3FC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E094D1CA1C5D1D3300732362 /* Build configuration list for PBXNativeTarget "Simulazione-Client" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E094D1CB1C5D1D3300732362 /* Debug */,
+				E094D1CC1C5D1D3300732362 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
