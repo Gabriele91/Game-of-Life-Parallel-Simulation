@@ -85,15 +85,15 @@ public:
     void add(const T& value)
     {
         required(sizeof(T));
-        (*((T*)mPtr)) = value;
-        mPtr+=sizeof(T);
+        (*((T*)m_ptr)) = value;
+        m_ptr+=sizeof(T);
     }
         
     template < typename T >
     void get(T& value)
     {
-        value = (*((T*)mPtr));
-        mPtr+=sizeof(T);
+        value = (*((T*)m_ptr));
+        m_ptr+=sizeof(T);
     }
         
     void reset()
