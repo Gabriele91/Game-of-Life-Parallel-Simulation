@@ -1,4 +1,4 @@
-//
+ //
 //  server_gol.h
 //  Simulazione
 //
@@ -51,33 +51,33 @@ public:
     using clients_grid_map = std::unordered_map< UID, client_grid >;
     
     server_gol() { }
-    server_gol(const grid::point_g& cluster_size,grid::point_g::type n_rows_columns)
+    server_gol(const grid::point_g& cluster_size,const grid::point_g&  n_rows_columns)
     {
         init_cluster(cluster_size, n_rows_columns);
     }
     
-    void init_cluster(const grid::point_g& cluster_size,grid::point_g::type n_rows_columns)
+    void init_cluster(const grid::point_g& cluster_size,const grid::point_g& n_rows_columns)
     {
         //is a MCD
-        assert((cluster_size.x % n_rows_columns)==0);
-        assert((cluster_size.y % n_rows_columns)==0);
+        assert((cluster_size.x % n_rows_columns.x)==0);
+        assert((cluster_size.y % n_rows_columns.y)==0);
         //
-        grid::point_g size(cluster_size.x / n_rows_columns,
-                           cluster_size.y / n_rows_columns);
+        grid::point_g size(cluster_size.x / n_rows_columns.x,
+                           cluster_size.y / n_rows_columns.y);
         //fake uid
         grid::point_g::type uid { 0 };
         //make custer grid
-        for(grid::point_g::type y = 0; y != n_rows_columns; ++y)
-        for(grid::point_g::type x = 0; x != n_rows_columns; ++x)
+        for(grid::point_g::type y = 0; y != n_rows_columns.y; ++y)
+        for(grid::point_g::type x = 0; x != n_rows_columns.x; ++x)
         {
             //left
-            grid::point_g::type cell_left = x == 0 ? -1 : x-1+y*n_rows_columns;
+            grid::point_g::type cell_left = x == 0 ? -1 : x-1+y*n_rows_columns.y;
             //right
-            grid::point_g::type cell_right   = x == n_rows_columns-1 ? -1 : x+1+y*n_rows_columns;
+            grid::point_g::type cell_right   = x == n_rows_columns.x-1 ? -1 : x+1+y*n_rows_columns.y;
             //top
-            grid::point_g::type cell_top = y == 0 ? -1 : x+(y-1)*n_rows_columns;
+            grid::point_g::type cell_top = y == 0 ? -1 : x+(y-1)*n_rows_columns.y;
             //bottom
-            grid::point_g::type cell_bottom = y == n_rows_columns-1 ? -1 : x+(y+1)*n_rows_columns;
+            grid::point_g::type cell_bottom = y == n_rows_columns.y-1 ? -1 : x+(y+1)*n_rows_columns.y;
             //...
             m_clients_grid_map[ ++uid ] =
             client_grid
@@ -102,7 +102,7 @@ public:
             if(it.second.m_bottom >= 0) it.second.m_bottom+=1;
         }
         //number of clients
-        m_max_clients = static_cast<int>(n_rows_columns*2);
+        m_max_clients = static_cast<int>(n_rows_columns.x*n_rows_columns.y);
     }
     
     void open(unsigned short port, double time_out)
@@ -116,10 +116,10 @@ public:
         //get info about client
         auto& info = m_clients_grid_map[client.m_uid];
         //init message
-        bit_stream init_message;
-        init_message.Write(T_MSG_INIT);
-        init_message.Write(info.grid_in_cluster);
-        init_message.Write(info.filter());
+        byte_vector_stream init_message;
+        init_message.add(T_MSG_INIT);
+        init_message.add(info.grid_in_cluster);
+        init_message.add(info.filter());
         send(client.m_uid,init_message);
         //inc count inits
         ++m_msg_init;
@@ -129,35 +129,40 @@ public:
     {
         //get info about client
         auto& info = m_clients_grid_map[client.m_uid];
-        //read int
-        int filter = 0;
-        stream.Read(filter);
-        //alloc
-        bit_size_t bytes = stream.GetNumberOfUnreadBits() / 8;
-        std::unique_ptr< unsigned char > buffer(new  unsigned char[bytes]);
-        //read remaning
-        stream.ReadBits(buffer.get(), bytes*8);
+        //get message
+        auto msg = byte_vector_stream::from_bit_stream(stream);
+        //time of message
+        long time = 0;
+        //edges_history
+        grid::edges_history edges_history;
+        //read message
+        get_history_message(msg, time, edges_history);
         //init message
-        bit_stream resend_message;
-        resend_message.Write(T_MSG_EDGES);
+        byte_vector_stream message;
+        //put type
+        message.add(T_MSG_EDGES);
         //message buffer
-        resend_message.WriteBits(buffer.get(), bytes*8);
+        build_history_message(message, time, edges_history);
         //sent to ...
-        if(filter & grid::TOP)
+        if(edges_history.m_edges & grid::TOP)
         {
-            send(info.m_top, resend_message);
+            MESSAGE("send time: "<<time<< " to TOP" );
+            send(info.m_top, message);
         }
-        if(filter & grid::BOTTOM)
+        if(edges_history.m_edges & grid::BOTTOM)
         {
-            send(info.m_bottom, resend_message);
+            MESSAGE("send time: "<<time<< " to BOTTOM" );
+            send(info.m_bottom, message);
         }
-        if(filter & grid::LEFT)
+        if(edges_history.m_edges & grid::LEFT)
         {
-            send(info.m_left, resend_message);
+            MESSAGE("send time: "<<time<< " to LEFT" );
+            send(info.m_left, message);
         }
-        if(filter & grid::LEFT)
+        if(edges_history.m_edges & grid::RIGHT)
         {
-            send(info.m_right, resend_message);
+            MESSAGE("send time: "<<time<< " to RIGHT" );
+            send(info.m_right, message);
         }
     }
     
@@ -171,8 +176,6 @@ public:
     {
         while(m_server_state != S_END)
         {
-            //update raknet
-            update();
             //states
             switch (m_server_state)
             {
@@ -182,18 +185,18 @@ public:
                    {
                        for(auto& l_client : m_clients)
                        {
-                           bit_stream stream;
-                           stream.Write(T_MSG_START);
+                           byte_vector_stream stream;
+                           stream.add(T_MSG_START);
                            send(l_client.first,stream);
                        }
                        m_server_state = S_START;
                    }
                 break;
-                case S_START:
-                    //to do
-                    break;
+                case S_START: /* todo */ break;
                 default: assert(0); break;
             }
+            //update raknet
+            update();
         }
         //good bye
         for(auto& client_grid : m_clients_grid_map)

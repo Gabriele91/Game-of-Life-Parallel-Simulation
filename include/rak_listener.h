@@ -30,15 +30,6 @@ class byte_vector_stream : protected std::vector< unsigned char >
 private:
         
 	unsigned char* m_ptr { nullptr };
-    //data remaning
-    size_t remaining() const
-    {
-        return data()+size() - m_ptr;
-    }
-    size_t offset() const
-    {
-        return m_ptr - data();
-    }
     //realloc
     void required(size_t rsize)
     {
@@ -58,6 +49,18 @@ public:
     byte_vector_stream()
     {
         reset();
+    }
+    
+    static byte_vector_stream from_bit_stream(const RakNet::BitStream& stream)
+    {        //get raw
+        unsigned char* msg_raw_ptr = stream.GetData();
+        //create message
+        byte_vector_stream msg;
+        //Add message
+        msg.add_array(msg_raw_ptr, stream.GetNumberOfUnreadBits()/8);
+        msg.reset();
+        //return message
+        return msg;
     }
         
     template< typename... Args >
@@ -80,7 +83,7 @@ public:
         get(value);
         get(args...);
     }
-        
+    
     template < typename T >
     void add(const T& value)
     {
@@ -88,19 +91,39 @@ public:
         (*((T*)m_ptr)) = value;
         m_ptr+=sizeof(T);
     }
-        
+    
     template < typename T >
     void get(T& value)
     {
         value = (*((T*)m_ptr));
         m_ptr+=sizeof(T);
     }
+    
+    template < typename T >
+    void add_array(const T& value,size_t elements)
+    {
+        size_t size = sizeof(T)*elements;
+        required(size);
+        std::memcpy(m_ptr, value, size);
+        m_ptr+=size;
+    }
         
     void reset()
     {
         m_ptr = data();
     }
-        
+    
+    //data remaning
+    size_t remaining() const
+    {
+        return data()+size() - m_ptr;
+    }
+    //data offset
+    size_t offset() const
+    {
+        return m_ptr - data();
+    }
+    
     unsigned char* data()
     {
         return std::vector< unsigned char >::data();

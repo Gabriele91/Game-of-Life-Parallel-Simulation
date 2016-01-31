@@ -12,6 +12,12 @@
 #include <grid.h>
 #include <grid.h>
 
+#ifdef _MSC_VER
+    #define ASPACKED( __Declaration__ ) __pragma( pack(push,1) ) __Declaration__   __pragma( pack(pop) )
+#else
+    #define ASPACKED( __Declaration__ ) __Declaration__ __attribute__((packed))
+#endif
+
 enum type_msg
 {
     T_MSG_INIT,
@@ -19,16 +25,47 @@ enum type_msg
     T_MSG_EDGES
 };
 
-struct grid_in_cluster
+ASPACKED(struct grid_in_cluster
 {
     grid::point_g m_pos;
     grid::point_g m_size;
-};
+});
 
-inline void build_actions_message(byte_vector_stream& stream_vector,grid::edges_actions& edges_actions)
+inline void get_history_message(byte_vector_stream& stream_vector,
+                                long& time,
+                                grid::edges_history& edges_history)
 {
+    //add time
+    stream_vector.get(time);
+    //add filter
+    stream_vector.get(edges_history.m_edges);
+    //count
+    long count = 0;
+    //add size
+    stream_vector.get(count);
     //push values
-    for(const grid::edges_action& edge_action : edges_actions)
+    for (long x = 0; x!=count; ++x)
+    {
+        grid::edges_action edge_action;
+        stream_vector.get(edge_action);
+        edges_history.m_edges_actions.push_back(edge_action);
+    }
+}
+
+inline void build_history_message(byte_vector_stream& stream_vector,
+                                  long time,
+                                  const grid::edges_history& edges_history)
+{
+    //add time
+    stream_vector.add(time);
+    //add filter
+    stream_vector.add(edges_history.m_edges);
+    //count of actions
+    long count = (long)edges_history.m_edges_actions.size();
+    //add size
+    stream_vector.add(count);
+    //push values
+    for(const grid::edges_action& edge_action : edges_history.m_edges_actions)
     {
         stream_vector.add(edge_action);
     }
