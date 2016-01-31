@@ -122,6 +122,36 @@ public:
         //inc count inits
         ++m_msg_init;
     }
+
+	void send_to(UID uid, 
+				 long time,
+			     const grid::edges_history& edges_history,
+				 unsigned char filter)
+	{
+		if (edges_history.m_edges & filter)
+		{
+			//applay filter
+			auto edges_history_filtered = edges_history.applay_filter(filter);
+			//no messages?
+			if (!edges_history_filtered.m_edges_actions.size()) return;
+			//message
+			byte_vector_stream message;
+			//put type
+			message.add(T_MSG_EDGES);
+			//message buffer
+			build_history_message(message, time, edges_history_filtered);
+			//send
+			switch (filter)
+			{
+				case grid::TOP:    MESSAGE("send time: " << time << " to TOP");    break;
+				case grid::BOTTOM: MESSAGE("send time: " << time << " to BOTTOM"); break;
+				case grid::LEFT:   MESSAGE("send time: " << time << " to LEFT");   break;
+				case grid::RIGHT:  MESSAGE("send time: " << time << " to RIGHT");  break;
+				default: break;
+			}
+			send(uid, message);
+		}
+	}
     
     virtual void on_message(client& client, bit_stream& stream)
     {
@@ -135,33 +165,11 @@ public:
         grid::edges_history edges_history;
         //read message
         get_history_message(msg, time, edges_history);
-        //init message
-        byte_vector_stream message;
-        //put type
-        message.add(T_MSG_EDGES);
-        //message buffer
-        build_history_message(message, time, edges_history);
         //sent to ...
-        if(edges_history.m_edges & grid::TOP)
-        {
-            MESSAGE("send time: "<<time<< " to TOP" );
-            send(info.m_top, message);
-        }
-        if(edges_history.m_edges & grid::BOTTOM)
-        {
-            MESSAGE("send time: "<<time<< " to BOTTOM" );
-            send(info.m_bottom, message);
-        }
-        if(edges_history.m_edges & grid::LEFT)
-        {
-            MESSAGE("send time: "<<time<< " to LEFT" );
-            send(info.m_left, message);
-        }
-        if(edges_history.m_edges & grid::RIGHT)
-        {
-            MESSAGE("send time: "<<time<< " to RIGHT" );
-            send(info.m_right, message);
-        }
+		send_to(info.m_top, time, edges_history, grid::TOP);
+		send_to(info.m_bottom, time, edges_history, grid::BOTTOM);
+		send_to(info.m_left, time, edges_history, grid::LEFT);
+		send_to(info.m_right, time, edges_history, grid::RIGHT);
     }
     
     virtual void on_disconnected(client& client)

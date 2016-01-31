@@ -105,7 +105,7 @@ public:
         if(m_grid.get())
         {
             //print
-            if( m_grid->time() <= 24 )
+            if( m_grid->time() <= 100 )
             {
                 std::cout <<  get_uid() << "\n" << m_grid->to_string_borders() << std::endl;
             }

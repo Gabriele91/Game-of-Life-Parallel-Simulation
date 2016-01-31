@@ -9,6 +9,7 @@
 #ifndef grid_h
 #define grid_h
 #include <map>
+#include <iostream>
 #include <unordered_map>
 #include <array>
 #include <vector>
@@ -63,6 +64,23 @@ public:
     {
         unsigned char m_edges;
         edges_actions m_edges_actions;
+		edges_history applay_filter(unsigned char filter) const
+		{
+			edges_history output;
+			output.m_edges = m_edges & filter;
+
+			//applay filter..
+			if (output.m_edges)
+			{
+				for (auto& edge_action : m_edges_actions)
+					if (edge_action.m_edge & output.m_edges)
+					{
+						output.m_edges_actions.push_back(edge_action);
+					}
+			}
+			//return
+			return output;
+		}
     };
     
     grid(const point_g& position,
@@ -130,7 +148,11 @@ public:
             }
             else
             {
-                assert(0);
+                //assert(0);
+				std::cout 
+					<< "wrong: " 
+					<< action.m_action.m_position.to_string() 
+					<< std::endl;
             }
         }
     }
@@ -284,13 +306,14 @@ public:
         return global(point_g(x, y));
     }
     
-    bool is_inside(const point_g& p_global)
+    bool is_inside(const point_g& global)
     {
-        point_g relative = p_global-m_position;
-        if(relative.x < -1) return false;
-        if(relative.y < -1) return false;
-        if(relative.x > size().x) return false;
-        if(relative.y > size().y) return false;
+		point_g min_p = m_position - point_g(1, 1);
+		point_g max_p = m_position + m_size;
+		if (global.x < min_p.x) return false;
+		if (global.x > max_p.x) return false;
+		if (global.y < min_p.y) return false;
+		if (global.y > max_p.y) return false;
         return true;
     }
     
