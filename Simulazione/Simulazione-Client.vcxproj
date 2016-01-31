@@ -19,18 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\client_gol.h" />
     <ClInclude Include="..\include\grid.h" />
+    <ClInclude Include="..\include\messages.h" />
     <ClInclude Include="..\include\point.h" />
     <ClInclude Include="..\include\rak_listener.h" />
+    <ClInclude Include="..\include\server_gol.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\main_client.cpp" />
     <ClCompile Include="..\src\rak_listener.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E5C7BD31-E76F-4F64-9097-5BD0E57FC86D}</ProjectGuid>
+    <ProjectGuid>{0ED1FA03-6BBE-44CE-AC9E-E7F086767467}</ProjectGuid>
     <RootNamespace>Simulazione</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>Simulazione-Client</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

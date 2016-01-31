@@ -16,8 +16,6 @@
 #include <rak_listener.h>
 #include <messages.h>
 
-#define MESSAGE( x ) std::cout << x << std::endl;
-
 class server_gol : server_listener
 {
 public:
@@ -64,8 +62,8 @@ public:
         //
         grid::point_g size(cluster_size.x / n_rows_columns.x,
                            cluster_size.y / n_rows_columns.y);
-        //fake uid
-        grid::point_g::type uid { 0 };
+        //uid
+		UID uid { 0 };
         //make custer grid
         for(grid::point_g::type y = 0; y != n_rows_columns.y; ++y)
         for(grid::point_g::type x = 0; x != n_rows_columns.x; ++x)

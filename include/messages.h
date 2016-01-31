@@ -9,13 +9,18 @@
 #ifndef messages_h
 #define messages_h
 
+#include <iostream>
 #include <grid.h>
 #include <grid.h>
 
+#define MESSAGE(x) std::cout << x << std::endl;
+
 #ifdef _MSC_VER
     #define ASPACKED( __Declaration__ ) __pragma( pack(push,1) ) __Declaration__   __pragma( pack(pop) )
+	#define MSLEEP(x) Sleep(x)
 #else
     #define ASPACKED( __Declaration__ ) __Declaration__ __attribute__((packed))
+	#define MSLEEP(x) usleep((x)*1000)
 #endif
 
 enum type_msg

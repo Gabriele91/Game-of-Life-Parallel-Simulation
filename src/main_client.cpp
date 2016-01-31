@@ -15,11 +15,10 @@ int main(int argc, const char * argv[])
     client.connect("127.0.0.1", 3456, 1000000);
     client.loop();
 #else
-    grid::point_g::type x=0;
+    grid::point_g::type x=10;
     //grid value
     grid l_grid({x,0},{4*8,4*8});
     //state 0...
-    x=0;
     
                        l_grid(1+x,0) = 1;
                                           l_grid(2+x,1) = 1;

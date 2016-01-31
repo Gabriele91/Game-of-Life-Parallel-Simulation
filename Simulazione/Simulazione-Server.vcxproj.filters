@@ -24,12 +24,21 @@
     <ClInclude Include="..\include\rak_listener.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\client_gol.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\messages.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\server_gol.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\main.cpp">
+    <ClCompile Include="..\src\rak_listener.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\rak_listener.cpp">
+    <ClCompile Include="..\src\main_server.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

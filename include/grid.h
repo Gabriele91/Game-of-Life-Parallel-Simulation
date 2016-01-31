@@ -255,7 +255,8 @@ public:
     
     value& global(const point_g& p)
     {
-        return m_matrix[p.y-m_position.y+1][p.x+m_position.x+1];
+		point_g pos = p - m_position;
+        return m_matrix[pos.y+1][pos.x+1];
     }
     
     value& global(point_g::type x, point_g::type y)
@@ -336,17 +337,16 @@ public:
         outstring += "\n";
         outstring += line_to_string_borders()+"\n";
         
-        for(point_g::type y = -1; y != m_size.y+1; ++y)
+        for(point_g::type y = 0; y != m_size.y+2; ++y)
         {
-            if(y == m_size.y) outstring += line_to_string_borders()+"\n";
+            if(y == m_size.y+1) outstring += line_to_string_borders()+"\n";
             
-            for(point_g::type x = -1; x != m_size.x+1; ++x)
+            for(point_g::type x = 0; x != m_size.x+2; ++x)
             {
-                point_g position = m_position+point_g(x,y);
-                outstring       += std::to_string(global(position)) + (x<0 || x==m_size.x-1 ? "|" : " ");
+                outstring       += std::to_string(local(point_g(x, y))) + (x==0 || x==m_size.x ? "|" : " ");
             }
             
-            if(y == -1) outstring += "\n" + line_to_string_borders();
+            if(y == 0) outstring += "\n" + line_to_string_borders();
             
             outstring += "\n";
         }

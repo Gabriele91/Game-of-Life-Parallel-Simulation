@@ -9,6 +9,7 @@
 #ifndef client_gol_h
 #define client_gol_h
 
+#include <memory>
 #include <unordered_map>
 #include <iostream>
 #include <grid.h>
@@ -16,8 +17,6 @@
 #include <rak_listener.h>
 #include <messages.h>
 #include <iostream>
-#define MESSAGE(x) std::cout << x << std::endl;
-#define MSLEEP(x) usleep((x)*1000)
 
 class client_gol : client_listener
 {
