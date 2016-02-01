@@ -17,7 +17,9 @@ int main(int argc, const char * argv[])
     //alloc server
     server_gol server{
         //{8,8}, {2,2},
-        {4*3,12}, {3,1},
+        //{4*3,12}, {3,1},
+        //{6*2,12}, {2,1},
+          {12,12}, {2,2},
         //{12,12}, {1,1}
     };
     //init

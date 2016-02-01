@@ -27,7 +27,10 @@ enum type_msg
 {
     T_MSG_INIT,
     T_MSG_START,
-    T_MSG_EDGES
+    T_MSG_EDGES,
+    T_MSG_UPDATE,
+    T_MSG_ACK_UPDATE,
+    T_MSG_HISTORY
 };
 
 ASPACKED(struct grid_in_cluster
@@ -37,7 +40,7 @@ ASPACKED(struct grid_in_cluster
 });
 
 inline void get_history_message(byte_vector_stream& stream_vector,
-                                long& time,
+                                grid::time_g& time,
                                 grid::edges_history& edges_history)
 {
     //add time

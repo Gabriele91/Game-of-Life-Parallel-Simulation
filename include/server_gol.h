@@ -23,7 +23,8 @@ public:
     enum state
     {
         S_WAIT,
-        S_START,
+        S_SEND_UPDATE,
+        S_ACK_UPDATE,
         S_END
     };
     
@@ -46,6 +47,7 @@ public:
         }
     };
     
+    using clients_ack_map  = std::map< UID, bool >;
     using clients_grid_map = std::unordered_map< UID, client_grid >;
     
     server_gol() { }
@@ -101,6 +103,10 @@ public:
         }
         //number of clients
         m_max_clients = static_cast<int>(n_rows_columns.x*n_rows_columns.y);
+        //init global time
+        m_global_time = 0;
+        //init acks map
+        m_clients_ack = clients_ack_map();
     }
     
     void open(unsigned short port, double time_out)
@@ -123,7 +129,7 @@ public:
         ++m_msg_init;
     }
 
-	void send_to(UID uid, 
+	bool send_to(UID uid,
 				 long time,
 			     const grid::edges_history& edges_history,
 				 unsigned char filter)
@@ -133,7 +139,7 @@ public:
 			//applay filter
 			auto edges_history_filtered = edges_history.applay_filter(filter);
 			//no messages?
-			if (!edges_history_filtered.m_edges_actions.size()) return;
+			if (!edges_history_filtered.m_edges_actions.size()) return false;
 			//message
 			byte_vector_stream message;
 			//put type
@@ -150,7 +156,11 @@ public:
 				default: break;
 			}
 			send(uid, message);
+            //is sended
+            return true;
 		}
+        //not sended
+        return false;
 	}
     
     virtual void on_message(client& client, bit_stream& stream)
@@ -159,18 +169,40 @@ public:
         auto& info = m_clients_grid_map[client.m_uid];
         //get message
         auto msg = byte_vector_stream::from_bit_stream(stream);
-        //time of message
-        long time = 0;
-        //edges_history
-        grid::edges_history edges_history;
-        //read message
-        get_history_message(msg, time, edges_history);
-        //sent to ...
-        MESSAGE( "from: "<< client.m_uid )
-		send_to(info.m_top, time, edges_history, grid::TOP);
-		send_to(info.m_bottom, time, edges_history, grid::BOTTOM);
-		send_to(info.m_left, time, edges_history, grid::LEFT);
-		send_to(info.m_right, time, edges_history, grid::RIGHT);
+        //get type
+        type_msg type;
+        msg.get(type);
+        //cases
+        switch (type)
+        {
+            //ack update
+            case T_MSG_ACK_UPDATE:
+            {
+                //count clients
+                m_clients_ack[client.m_uid] = true;
+            }
+            break;
+            //get hitory diff
+            case T_MSG_HISTORY:
+            {
+                //time of message
+                grid::time_g time = 0;
+                //edges_history
+                grid::edges_history edges_history;
+                //read message
+                get_history_message(msg, time, edges_history);
+                //sent to ...
+                MESSAGE( "from: "<< client.m_uid )
+                if(send_to(info.m_top, time, edges_history, grid::TOP))       m_clients_ack[info.m_top]    = false;
+                if(send_to(info.m_bottom, time, edges_history, grid::BOTTOM)) m_clients_ack[info.m_bottom] = false;
+                if(send_to(info.m_left, time, edges_history, grid::LEFT))     m_clients_ack[info.m_left]   = false;
+                if(send_to(info.m_right, time, edges_history, grid::RIGHT))   m_clients_ack[info.m_right]  = false;
+                //count clients
+                m_clients_ack[client.m_uid] = true;
+            }
+            break;
+            default: assert(0); break;
+        }
     }
     
     virtual void on_disconnected(client& client)
@@ -196,10 +228,42 @@ public:
                            stream.add(T_MSG_START);
                            send(l_client.first,stream);
                        }
-                       m_server_state = S_START;
+                       m_server_state = S_SEND_UPDATE;
                    }
-                break;
-                case S_START: /* todo */ break;
+                    break;
+                case S_SEND_UPDATE:
+                    //if ...
+                    if(m_global_time > 36) break;
+                    //next time stemp
+                    ++m_global_time;
+                    //send to all
+                    for(auto& l_client : m_clients)
+                    {
+                        byte_vector_stream stream;
+                        stream.add(T_MSG_UPDATE);
+                        stream.add(m_global_time);
+                        send(l_client.first,stream);
+                        //wait ack
+                        m_clients_ack[l_client.second.m_uid] = false;
+                    }
+                    //wait ack
+                    m_server_state = S_ACK_UPDATE;
+                    //..
+                    break;
+                case S_ACK_UPDATE:
+                    //next state?
+                    m_server_state = S_SEND_UPDATE;
+                    //all acks?
+                    for(auto& l_client : m_clients)
+                    {
+                        if(!m_clients_ack[l_client.second.m_uid])
+                        {
+                           m_server_state = S_ACK_UPDATE;
+                           break;
+                        }
+                    }
+                    //..
+                    break;
                 default: assert(0); break;
             }
             //update raknet
@@ -213,9 +277,11 @@ public:
     }
     
 private:
-    state            m_server_state     { S_WAIT };
-    int              m_max_clients      { 0      };
-    int              m_msg_init         { 0      };
+    clients_ack_map       m_clients_ack;
+    grid::time_g          m_global_time    { 0      };
+    state                 m_server_state   { S_WAIT };
+    int                   m_max_clients    { 0      };
+    int                   m_msg_init       { 0      };
     clients_grid_map m_clients_grid_map;
     
 };

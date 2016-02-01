@@ -23,7 +23,7 @@ class grid
 {
 public:
 
-
+    using time_g   = long;
     using point_g  = point_l;
     using value    = short;
     using row      = std::vector< value >;
@@ -65,13 +65,27 @@ public:
         point_g m_position;
         value   m_old;
         value   m_new;
+        
+        bool operator == (const action& action) const
+        {
+            return m_position == action.m_position &&
+                   m_old      == action.m_old      &&
+                   m_new      == action.m_new;;
+        }
+        
+        bool operator != (const action& action) const
+        {
+            return m_position != action.m_position ||
+                   m_old      != action.m_old      ||
+                   m_new      != action.m_new;;
+        }
     };
 
     using actions  = std::unordered_map< point_g,
                                          action,
                                          point_hash_equal,
                                          point_hash_equal >;
-    using history  = std::map< size_t,  actions >;
+    using history  = std::map< time_g,  actions >;
 
 	enum edge
 	{
@@ -128,26 +142,26 @@ public:
         }
     }
 
-	void go_to(size_t new_time)
+	void go_to(time_g new_time)
 	{
 		if (new_time < m_time) go_back(new_time);
 		if (new_time > m_time) go_next(new_time);
 	}
 
-	void go_next(size_t n_time)
+	void go_next(time_g n_time)
 	{
 		//if n_time < m_time fail...
 		assert(n_time >= m_time);
 		//no change state
 		if (n_time == m_time) return;
 		//for each update
-		for (size_t time = m_time; time != n_time ; ++time)
+		for (time_g time = m_time; time != n_time ; ++time)
 		{
 			update();
 		}
 	}
     
-    void delete_history(size_t time)
+    void delete_history(time_g time)
     {
         //get actions
         actions& l_actions = m_history[time];
@@ -167,7 +181,7 @@ public:
         }
     }
     
-	void go_back(size_t b_time)
+	void go_back(time_g b_time)
     {
         //if b_time > m_time fail...
         assert(b_time <= m_time);
@@ -175,7 +189,7 @@ public:
         if(!m_time)          return;
         if(b_time == m_time) return;
         //go back
-        for(size_t l_time = m_time; l_time !=b_time; --l_time)
+        for(time_g l_time = m_time; l_time !=b_time; --l_time)
         {
             applay_old(l_time);
 			//remove (?)
@@ -185,8 +199,10 @@ public:
         m_time = b_time;
     }
     
-    void applay_history_edges(size_t time,const edges_history& history)
+    actions applay_history_edges(time_g time,const edges_history& history)
     {
+        //save diff
+        actions old_actions = m_history[time];
         //go back
         go_to(time-1);
         //add history
@@ -207,67 +223,95 @@ public:
         }
         //update..
         update();
+        //save new states
+        const actions& new_actions = m_history[time];
+        //update..
+        actions output;
+        //for all actions
+        for(auto it_new_action : new_actions)
+        {
+            //search
+            auto it_old_action = old_actions.find(it_new_action.first);
+            //1 - not exists
+            if(it_old_action == old_actions.end())
+            {
+                output[it_new_action.first] = it_new_action.second;
+            }
+            //are diff
+            else if(it_old_action->second != it_new_action.second)
+            {
+                output[it_new_action.first] = it_new_action.second;
+            }
+        }
+        //output borders
+        return output;
     }
     
     edges_history get_last_history_edges(unsigned char filter = ALL)
     {
         return std::move(get_history_edges(m_time,filter));
     }
-
-	edges_history get_history_edges(size_t time, unsigned char filter = ALL)
-	{
+    
+    
+    edges_history get_history_edges(const actions& l_actions, unsigned char filter = ALL)
+    {
         //boder type
         unsigned char g_type = 0;
         unsigned char type   = 0;
-		//output
-		edges_actions output;
-		//get actions
-		const actions& l_actions = m_history[time];
-		//applay
-		for (auto it : l_actions)
-		{
+        //output
+        edges_actions output;
+        //applay
+        for (auto it : l_actions)
+        {
             //action
             const action& l_action = it.second;
-			//no border
-			type = 0;
-			//position
-			if (l_action.m_position.x == m_position.x)
-			{
-				type   |= LEFT & filter;
+            //no border
+            type = 0;
+            //position
+            if (l_action.m_position.x == m_position.x)
+            {
+                type   |= LEFT & filter;
                 g_type |= LEFT & filter;
-			}
+            }
             if (l_action.m_position.x == m_position.x + m_size.x - 1)
-			{
+            {
                 type   |= RIGHT & filter;
                 g_type |= RIGHT & filter;
             }
             if (l_action.m_position.y == m_position.y)
-			{
+            {
                 type   |= TOP & filter;
                 g_type |= TOP & filter;
             }
             if (l_action.m_position.y == m_position.y + m_size.y - 1)
-			{
+            {
                 type   |= BOTTOM & filter;
                 g_type |= BOTTOM & filter;
-			}
-			//is on edge?
-			if (type)
-			{
-				output.push_back(
-				edges_action
-				{
-					type,
-					l_action
-				});
-			}
-		}
-		//return info
+            }
+            //is on edge?
+            if (type)
+            {
+                output.push_back(
+                                 edges_action
+                                 {
+                                     type,
+                                     l_action
+                                 });
+            }
+        }
+        //return info
         return edges_history
         {
             g_type,
             output
         };
+    }
+    
+	edges_history get_history_edges(time_g time, unsigned char filter = ALL)
+	{
+		//get actions
+		const actions& l_actions = m_history[time];
+        return std::move(get_history_edges(l_actions,filter));
 	}
 
 	void update()
@@ -305,7 +349,7 @@ public:
         }
     }
     
-    size_t time() const
+    time_g time() const
     {
         return m_time;
     }
@@ -405,7 +449,7 @@ public:
         
         if(print_actions)
         {
-            size_t last =  m_time ? m_time -1 : 0;
+            time_g last =  m_time ? m_time -1 : 0;
             outstring  += line_to_string();
             outstring  += history_to_string( last );
             outstring  += "\n";
@@ -442,7 +486,7 @@ public:
         
         if(print_actions)
         {
-            size_t last =  m_time ? m_time -1 : 0;
+            time_g last =  m_time ? m_time -1 : 0;
             outstring  += line_to_string();
             outstring  += history_to_string( last );
             outstring  += "\n";
@@ -484,7 +528,7 @@ protected:
         }
     }
     
-    void applay_new(size_t time)
+    void applay_new(time_g time)
     {
         //search
         auto it = m_history.find(time);
@@ -499,7 +543,7 @@ protected:
         }
     }
     
-    void applay_old(size_t time)
+    void applay_old(time_g time)
     {
         //search
         auto it = m_history.find(time);
@@ -514,7 +558,7 @@ protected:
         }
     }
     
-    std::string history_to_string(size_t time)
+    std::string history_to_string(time_g time)
     {
         std::string outstring;
         //search
@@ -558,7 +602,7 @@ protected:
     
 private:
     
-    size_t   m_time { 0 };
+    time_g   m_time { 0 };
     history  m_history;
     point_g  m_position;
     point_g  m_size;

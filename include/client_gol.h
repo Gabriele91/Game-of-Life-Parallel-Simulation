@@ -68,10 +68,16 @@ public:
                     m_grid->global({0,2}) = 1; m_grid->global({1,2}) = 1; m_grid->global({2,2}) = 1;
                 }
             break;
+            case T_MSG_UPDATE:
+            {
+                this_update();
+                send_last_time_history();
+            }
+            break;
             case T_MSG_EDGES:
             {
                 //time of message
-                long time = 0;
+                grid::time_g time = 0;
                 //edges_history
                 grid::edges_history edges_history;
                 //read message
@@ -81,11 +87,14 @@ public:
                         << " UID: "     << get_uid()
                         << " actions: " << edges_history.m_edges_actions.size() );
                 //applay
-                m_grid->applay_history_edges(time, edges_history);
-                //compute this time
-                m_grid->update();
+                grid::edges_history new_edges_history =
+                                    m_grid->get_history_edges(m_grid->applay_history_edges(time,
+                                                                                           edges_history),
+                                                              m_filter);
+                //
+                MESSAGE(m_grid->to_string_borders())
                 //update
-                this_update();
+                send_history(m_grid->time(),new_edges_history);
             }
             break;
             default: break;
@@ -97,40 +106,54 @@ public:
         m_loop = false;
     }
     
+    void send_history(grid::time_g time, const grid::edges_history& edges_history)
+    {
+        //send?
+        if(edges_history.m_edges_actions.size())
+        {
+            //build message
+            byte_vector_stream msg;
+            //send history
+            msg.add(T_MSG_HISTORY);
+            //add history
+            build_history_message(msg,time,edges_history);
+            //send
+            MESSAGE(   " send time: " << time
+                    << " UID: "       << get_uid()
+                    << " actions: "   << edges_history.m_edges_actions.size() )
+            //send
+            send(msg);
+        }
+        else
+        {
+            //build message
+            byte_vector_stream msg;
+            //send history
+            msg.add(T_MSG_ACK_UPDATE);
+            //send
+            send(msg);
+        }
+    }
+    
+    void send_last_time_history()
+    {
+        //get edge diff
+        auto last_history = m_grid->get_last_history_edges(m_filter);
+        //send
+        send_history(m_grid->time(),last_history);
+    }
+    
     void this_update()
     {
-        //sleep
-        MSLEEP(200);
-        //if is started
         if(m_grid.get())
         {
-            //print
-            if( m_grid->time() <= 100 )
-            {
-                std::cout <<  get_uid() << "\n" << m_grid->to_string_borders() << std::endl;
-            }
-            //get edge diff
-            auto last_history = m_grid->get_last_history_edges(m_filter);
-            //send?
-            if(last_history.m_edges_actions.size())
-            {
-                //get last time
-                long last_time = (long)m_grid->time();
-                //build message
-                byte_vector_stream msg;
-                //add history
-                build_history_message(msg,last_time,last_history);
-                //send
-                MESSAGE(     "send time: " << last_time
-                           << " UID: "     << get_uid()
-                           << " actions: " << last_history.m_edges_actions.size() )
-                //send
-                send(msg);
-            }
-            //update grid
             m_grid->update();
+            MESSAGE(m_grid->to_string_borders())
         }
-        
+        else
+        {
+            assert(0);
+        }
     }
     
     void loop()
@@ -139,7 +162,7 @@ public:
         {
             //update raknet
             update();
-            this_update();
+            //this_update();
         }
     }
 
