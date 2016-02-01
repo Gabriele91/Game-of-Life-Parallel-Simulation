@@ -15,7 +15,11 @@ int main(int argc, const char * argv[])
 {
     
     //alloc server
-    server_gol server{ {8*3,20 }, {3,1} };
+    server_gol server{
+        //{8,8}, {2,2},
+        {4*3,12}, {3,1},
+        //{12,12}, {1,1}
+    };
     //init
     server.open(3456, 1000000);
     //start loop server

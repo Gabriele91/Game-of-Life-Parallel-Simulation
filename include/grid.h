@@ -11,17 +11,13 @@
 #include <map>
 #include <iostream>
 #include <unordered_map>
+#include <limits>
 #include <array>
 #include <vector>
 #include <string>
 #include <point.h>
 #include <assert.h>
 
-#if 0
-    #define DEALLOC_HISTORY(x) x
-#else
-    #define DEALLOC_HISTORY(x)
-#endif
 
 class grid
 {
@@ -33,6 +29,37 @@ public:
     using row      = std::vector< value >;
     using matrix   = std::vector< row >;
     
+    struct point_hash_equal
+    {
+        size_t operator () (const point_g& key) const
+        {
+        #if 0
+            //64/32 bit machine
+            if(sizeof(size_t) == 8)
+            {
+                return (key.x  & 0xFFFFFFFF00000000) | (key.y >> (4*8)) ;
+            }
+            if(sizeof(size_t) == 4)
+            {
+                return (key.x  & 0xFFFF0000) | (key.y >> (2*8)) ;
+            }
+            else
+            {
+                assert(0);
+            }
+        #else
+            const long max = std::numeric_limits<long>::max();
+            return (max-key.x) * (max-key.y);
+        #endif
+            //hash
+        }
+        
+        bool operator () (const point_g& left,const point_g& right) const
+        {
+            return left == right;
+        }
+    };
+
     struct action
     {
         point_g m_position;
@@ -40,8 +67,11 @@ public:
         value   m_new;
     };
 
-    using actions  = std::vector< action >;
-    using history  = std::map< size_t, actions >;
+    using actions  = std::unordered_map< point_g,
+                                         action,
+                                         point_hash_equal,
+                                         point_hash_equal >;
+    using history  = std::map< size_t,  actions >;
 
 	enum edge
 	{
@@ -117,6 +147,26 @@ public:
 		}
 	}
     
+    void delete_history(size_t time)
+    {
+        //get actions
+        actions& l_actions = m_history[time];
+        //it not have some actions? return
+        if(!l_actions.size()) return;
+        //for all point in grid (no borders)
+        for (auto it = l_actions.cbegin(); it != l_actions.cend(); )
+        {
+            if (is_inside_no_borders(it->first))
+            {
+                l_actions.erase(it++);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+    
 	void go_back(size_t b_time)
     {
         //if b_time > m_time fail...
@@ -129,7 +179,7 @@ public:
         {
             applay_old(l_time);
 			//remove (?)
-			DEALLOC_HISTORY(m_history.erase( l_time );)
+            delete_history(l_time);
         }
         //new corrent time
         m_time = b_time;
@@ -137,14 +187,14 @@ public:
     
     void applay_history_edges(size_t time,const edges_history& history)
     {
-        //go back if is necessary
-        go_to(time);
-        //applay
+        //go back
+        go_to(time-1);
+        //add history
         for(auto& action : history.m_edges_actions)
         {
-            if(is_inside(action.m_action.m_position))
+            if(is_inside_borders(action.m_action.m_position))
             {
-                global(action.m_action.m_position) = action.m_action.m_new;
+                m_history[time][action.m_action.m_position] = action.m_action;
             }
             else
             {
@@ -155,6 +205,8 @@ public:
 					<< std::endl;
             }
         }
+        //update..
+        update();
     }
     
     edges_history get_last_history_edges(unsigned char filter = ALL)
@@ -172,29 +224,29 @@ public:
 		//get actions
 		const actions& l_actions = m_history[time];
 		//applay
-		for (const action& l_action : l_actions)
+		for (auto it : l_actions)
 		{
+            //action
+            const action& l_action = it.second;
 			//no border
 			type = 0;
-			//get relative
-			point_g relative = l_action.m_position - m_position;
 			//position
-			if (relative.x == 0)
+			if (l_action.m_position.x == m_position.x)
 			{
 				type   |= LEFT & filter;
                 g_type |= LEFT & filter;
 			}
-			if (relative.x == m_size.x - 1)
+            if (l_action.m_position.x == m_position.x + m_size.x - 1)
 			{
                 type   |= RIGHT & filter;
                 g_type |= RIGHT & filter;
-			}
-			if (relative.y == 0)
+            }
+            if (l_action.m_position.y == m_position.y)
 			{
                 type   |= TOP & filter;
                 g_type |= TOP & filter;
-			}
-			if (relative.y == m_size.y - 1)
+            }
+            if (l_action.m_position.y == m_position.y + m_size.y - 1)
 			{
                 type   |= BOTTOM & filter;
                 g_type |= BOTTOM & filter;
@@ -231,7 +283,7 @@ public:
         //count inc
         ++m_time;
         //get
-        actions l_actions;
+        actions& l_actions=m_history[m_time];
         //
         for(point_g::type y = 0; y != m_size.y; ++y)
         for(point_g::type x = 0; x != m_size.x; ++x)
@@ -242,17 +294,15 @@ public:
             //add action?
             if(next != global(point))
             {
-                l_actions.push_back(
+                l_actions[point]=
                 action
                 {
                     point,
                     global(point),
                     next
-                });
+                };
             }
         }
-        //add
-        m_history[m_time] = l_actions;
     }
     
     size_t time() const
@@ -308,13 +358,29 @@ public:
     
     bool is_inside(const point_g& global)
     {
-		point_g min_p = m_position - point_g(1, 1);
-		point_g max_p = m_position + m_size;
-		if (global.x < min_p.x) return false;
-		if (global.x > max_p.x) return false;
-		if (global.y < min_p.y) return false;
-		if (global.y > max_p.y) return false;
+        point_g min_p = m_position - point_g(1, 1);
+        point_g max_p = m_position + m_size;
+        if (global.x < min_p.x) return false;
+        if (global.x > max_p.x) return false;
+        if (global.y < min_p.y) return false;
+        if (global.y > max_p.y) return false;
         return true;
+    }
+    
+    bool is_inside_no_borders(const point_g& global)
+    {
+        point_g min_p = m_position;
+        point_g max_p = m_position + m_size - point_g(1, 1);
+        if (global.x < min_p.x) return false;
+        if (global.x > max_p.x) return false;
+        if (global.y < min_p.y) return false;
+        if (global.y > max_p.y) return false;
+        return true;
+    }
+    
+    bool is_inside_borders(const point_g& global)
+    {
+        return is_inside(global) && !is_inside_no_borders(global);
     }
     
     std::string to_string(bool print_actions = false)
@@ -426,9 +492,9 @@ protected:
         if(it != m_history.end())
         {
             //applay
-            for(action& l_action : it->second)
+            for(auto it : it->second)
             {
-                global(l_action.m_position) = l_action.m_new;
+                global(it.second.m_position) = it.second.m_new;
             }
         }
     }
@@ -441,9 +507,9 @@ protected:
         if(it != m_history.end())
         {
             //applay
-            for(action& l_action : it->second)
+            for(auto it : it->second)
             {
-                global(l_action.m_position) = l_action.m_old;
+                global(it.second.m_position) = it.second.m_old;
             }
         }
     }
@@ -457,8 +523,9 @@ protected:
         if(it != m_history.end())
         {
             //applay
-            for(action& l_action : it->second)
+            for(auto it : it->second)
             {
+                const action& l_action = it.second;
                 outstring+= "position: " + l_action.m_position.to_string() + "\n";
                 outstring+= "old state:" + std::to_string(l_action.m_old) + "\n";
                 outstring+= "new state:" + std::to_string(l_action.m_new) + "\n";

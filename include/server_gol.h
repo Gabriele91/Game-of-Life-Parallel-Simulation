@@ -73,9 +73,9 @@ public:
             //right
             grid::point_g::type cell_right   = x == n_rows_columns.x-1 ? -1 : x+1+y*n_rows_columns.y;
             //top
-            grid::point_g::type cell_top = y == 0 ? -1 : x+(y-1)*n_rows_columns.y;
+            grid::point_g::type cell_top = y == 0 ? -1 : x+(y-1)*n_rows_columns.x;
             //bottom
-            grid::point_g::type cell_bottom = y == n_rows_columns.y-1 ? -1 : x+(y+1)*n_rows_columns.y;
+            grid::point_g::type cell_bottom = y == n_rows_columns.y-1 ? -1 : x+(y+1)*n_rows_columns.x;
             //...
             m_clients_grid_map[ ++uid ] =
             client_grid
@@ -166,6 +166,7 @@ public:
         //read message
         get_history_message(msg, time, edges_history);
         //sent to ...
+        MESSAGE( "from: "<< client.m_uid )
 		send_to(info.m_top, time, edges_history, grid::TOP);
 		send_to(info.m_bottom, time, edges_history, grid::BOTTOM);
 		send_to(info.m_left, time, edges_history, grid::LEFT);
