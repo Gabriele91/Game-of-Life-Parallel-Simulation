@@ -71,7 +71,7 @@ public:
             case T_MSG_EDGES:
             {
                 //time of message
-                long time = 0;
+                grid::time_g time = 0;
                 //edges_history
                 grid::edges_history edges_history;
                 //read message
@@ -81,11 +81,14 @@ public:
                         << " UID: "     << get_uid()
                         << " actions: " << edges_history.m_edges_actions.size() );
                 //applay
-                m_grid->applay_history_edges(time, edges_history);
-                //compute this time
-                m_grid->update();
+                grid::edges_history new_edges_history =
+                m_grid->get_history_edges(m_grid->applay_history_edges(time,
+                                                                       edges_history),
+                                          m_filter);
+                //
+                MESSAGE(m_grid->to_string_borders())
                 //update
-                this_update();
+                send_history(m_grid->time(),new_edges_history);
             }
             break;
             default: break;
@@ -95,6 +98,32 @@ public:
     virtual void on_disconnected()
     {
         m_loop = false;
+    }
+    
+    void send_history(grid::time_g time, const grid::edges_history& edges_history)
+    {
+        //send?
+        if(edges_history.m_edges_actions.size())
+        {
+            //build message
+            byte_vector_stream msg;
+            //add history
+            build_history_message(msg,time,edges_history);
+            //send
+            MESSAGE(   " send time: " << time
+                    << " UID: "       << get_uid()
+                    << " actions: "   << edges_history.m_edges_actions.size() )
+            //send
+            send(msg);
+        }
+    }
+    
+    void send_last_time_history()
+    {
+        //get edge diff
+        auto last_history = m_grid->get_last_history_edges(m_filter);
+        //send
+        send_history(m_grid->time(),last_history);
     }
     
     void this_update()
@@ -110,23 +139,7 @@ public:
                 std::cout <<  get_uid() << "\n" << m_grid->to_string_borders() << std::endl;
             }
             //get edge diff
-            auto last_history = m_grid->get_last_history_edges(m_filter);
-            //send?
-            if(last_history.m_edges_actions.size())
-            {
-                //get last time
-                long last_time = (long)m_grid->time();
-                //build message
-                byte_vector_stream msg;
-                //add history
-                build_history_message(msg,last_time,last_history);
-                //send
-                MESSAGE(     "send time: " << last_time
-                           << " UID: "     << get_uid()
-                           << " actions: " << last_history.m_edges_actions.size() )
-                //send
-                send(msg);
-            }
+            send_last_time_history();
             //update grid
             m_grid->update();
         }

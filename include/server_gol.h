@@ -160,7 +160,7 @@ public:
         //get message
         auto msg = byte_vector_stream::from_bit_stream(stream);
         //time of message
-        long time = 0;
+        grid::time_g time = 0;
         //edges_history
         grid::edges_history edges_history;
         //read message
