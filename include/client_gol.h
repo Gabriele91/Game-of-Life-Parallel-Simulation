@@ -92,7 +92,7 @@ public:
                                                                                            edges_history),
                                                               m_filter);
                 //
-                MESSAGE(m_grid->to_string_borders())
+                //MESSAGE(m_grid->to_string_borders(true))
                 //update
                 send_history(m_grid->time(),new_edges_history);
             }
@@ -118,7 +118,7 @@ public:
             //add history
             build_history_message(msg,time,edges_history);
             //send
-            MESSAGE(   " send time: " << time
+            MESSAGE(   "send time: " << time
                     << " UID: "       << get_uid()
                     << " actions: "   << edges_history.m_edges_actions.size() )
             //send
@@ -147,8 +147,12 @@ public:
     {
         if(m_grid.get())
         {
+            if(m_grid->time()==35)
+            {
+                MESSAGE("...");
+            }
             m_grid->update();
-            MESSAGE(m_grid->to_string_borders())
+            MESSAGE(m_grid->to_string_borders(true))
         }
         else
         {

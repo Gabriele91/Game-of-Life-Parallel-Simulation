@@ -19,6 +19,7 @@
 #include <assert.h>
 
 
+
 class grid
 {
 public:
@@ -59,6 +60,7 @@ public:
             return left == right;
         }
     };
+    
 
     struct action
     {
@@ -108,7 +110,7 @@ public:
     {
         unsigned char m_edges;
         edges_actions m_edges_actions;
-		edges_history applay_filter(unsigned char filter) const
+		edges_history applay_filter(unsigned char filter,bool equals = false) const
 		{
 			edges_history output;
 			output.m_edges = m_edges & filter;
@@ -117,10 +119,16 @@ public:
 			if (output.m_edges)
 			{
 				for (auto& edge_action : m_edges_actions)
-					if (edge_action.m_edge & output.m_edges)
+                {
+					if (!equals && edge_action.m_edge & output.m_edges)
 					{
 						output.m_edges_actions.push_back(edge_action);
 					}
+                    else if (equals && edge_action.m_edge == output.m_edges)
+                    {
+                        output.m_edges_actions.push_back(edge_action);
+                    }
+                }
 			}
 			//return
 			return output;
@@ -371,7 +379,9 @@ public:
     
     value& global(const point_g& p)
     {
+        //relative
 		point_g pos = p - m_position;
+        //global
         return m_matrix[pos.y+1][pos.x+1];
     }
     
@@ -486,9 +496,8 @@ public:
         
         if(print_actions)
         {
-            time_g last =  m_time ? m_time -1 : 0;
             outstring  += line_to_string();
-            outstring  += history_to_string( last );
+            outstring  += history_to_string( m_time );
             outstring  += "\n";
             outstring  += line_to_string();
         }

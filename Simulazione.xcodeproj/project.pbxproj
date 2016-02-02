@@ -36,6 +36,7 @@
 
 /* Begin PBXFileReference section */
 		E021842C1C5CB031005B3FC6 /* Simulazione-Server */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Simulazione-Server"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E055C1BC1C5FA28800D48D64 /* modulo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = modulo.h; sourceTree = "<group>"; };
 		E094CFDD1C5CFFF700732362 /* main_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_server.cpp; sourceTree = "<group>"; };
 		E094CFDE1C5CFFF700732362 /* rak_listener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rak_listener.cpp; sourceTree = "<group>"; };
 		E094CFE21C5CFFFE00732362 /* grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = grid.h; sourceTree = "<group>"; };
@@ -260,6 +261,7 @@
 				E094D1C21C5D042E00732362 /* server_gol.h */,
 				E094D1D11C5D1E0600732362 /* client_gol.h */,
 				E094D1C31C5D134100732362 /* messages.h */,
+				E055C1BC1C5FA28800D48D64 /* modulo.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
