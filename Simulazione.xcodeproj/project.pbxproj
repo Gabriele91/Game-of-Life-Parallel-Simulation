@@ -39,6 +39,8 @@
 		E055C1BC1C5FA28800D48D64 /* modulo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = modulo.h; sourceTree = "<group>"; };
 		E06552021C60E02E00E58D8B /* json11.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = json11.hpp; sourceTree = "<group>"; };
 		E06552031C60E03F00E58D8B /* libjson11.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libjson11.a; sourceTree = "<group>"; };
+		E06552051C60E57E00E58D8B /* client.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = client.json; sourceTree = "<group>"; };
+		E06552061C60E57E00E58D8B /* server.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = server.json; sourceTree = "<group>"; };
 		E094CFDD1C5CFFF700732362 /* main_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_server.cpp; sourceTree = "<group>"; };
 		E094CFDE1C5CFFF700732362 /* rak_listener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rak_listener.cpp; sourceTree = "<group>"; };
 		E094CFE21C5CFFFE00732362 /* grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = grid.h; sourceTree = "<group>"; };
@@ -228,6 +230,7 @@
 		E02184231C5CB031005B3FC6 = {
 			isa = PBXGroup;
 			children = (
+				E06552041C60E57E00E58D8B /* assets */,
 				E094D0821C5D013700732362 /* dependencies */,
 				E094CFE11C5CFFFE00732362 /* include */,
 				E094CFDC1C5CFFF700732362 /* src */,
@@ -242,6 +245,15 @@
 				E094D1CD1C5D1D3300732362 /* Simulazione-Client */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E06552041C60E57E00E58D8B /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				E06552051C60E57E00E58D8B /* client.json */,
+				E06552061C60E57E00E58D8B /* server.json */,
+			);
+			path = assets;
 			sourceTree = "<group>";
 		};
 		E094CFDC1C5CFFF700732362 /* src */ = {
@@ -648,7 +660,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-lRakNetLibStatic_D",
-					"-llibjson11",
+					"-ljson11",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -667,7 +679,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-lRakNetLibStatic",
-					"-llibjson11",
+					"-ljson11",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -686,7 +698,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-lRakNetLibStatic_D",
-					"-llibjson11",
+					"-ljson11",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -705,7 +717,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-lRakNetLibStatic",
-					"-llibjson11",
+					"-ljson11",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

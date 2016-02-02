@@ -7,51 +7,51 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <grid.h>
 #include <rak_listener.h>
 #include <server_gol.h>
+#include <json11.hpp>
 
 int main(int argc, const char * argv[])
 {
     
-    //alloc server
-    server_gol server{
-        //{8,8}, {2,2},
-        //{4*3,12}, {3,1},
-        //{6*2,12}, {2,1},
-        //{12,12}, {2,2}, true
-        {12,12}, {2,2}, true
-        //{12,12}, {1,1}, true
-        //{8,8}, {1,1}, true
-        //{12,12}, {1,1}
+    //error message
+    if(argc < 2){ std::cout << "Not valid input" << std::endl; return -1; }
+    //load json
+    std::ifstream file(argv[1]);
+    //test file
+    if(!file.is_open()){ std::cout << "Can't open json file" << std::endl; return -1; }
+    //get text
+    std::string json_text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    //errors
+    std::string err_comment;
+    //get json
+    auto json_object = json11::Json::parse(json_text, err_comment, json11::JsonParse::COMMENTS);
+    //errors
+    if (!err_comment.empty())
+    {
+        std::cout << "Failed: " << err_comment.c_str() << std::endl;
+        return -1;
+    }
+    //get json
+    auto cluster = json_object["cluster"];
+    //client
+    server_gol server
+    {
+        {
+            cluster["size"][0].int_value(),
+            cluster["size"][1].int_value(),
+        },
+        {
+            cluster["clients"][0].int_value(),
+            cluster["clients"][1].int_value(),
+        },
+        cluster["cicle"].bool_value()
     };
-    //init
-    server.open(3456, 1000000);
-    //start loop server
+    server.open(json_object["port"].int_value() ,
+                json_object["time"].int_value() );
     server.loop();
-    
-    /*
-    grid l_grid({0,0},{8,8});
-    //set points
-                     l_grid(1,0) = 1;
-                                      l_grid(2,1) = 1;
-    l_grid(0,2) = 1; l_grid(1,2) = 1; l_grid(2,2) = 1;
-	//state 0
-	std::cout << l_grid.to_string();
-
-	l_grid.go_to(17);
-	std::cout << l_grid.to_string();
-	l_grid.go_to(18);
-	std::cout << l_grid.to_string();
-	l_grid.go_to(19);
-	std::cout << l_grid.to_string();
-	l_grid.go_to(20);
-	std::cout << l_grid.to_string();
-
-	auto e_h_17 = l_grid.get_history_edges(17);
-	auto e_h_18 = l_grid.get_history_edges(18);
-	auto e_h_19 = l_grid.get_history_edges(19);
-	auto e_h_20 = l_grid.get_history_edges(20);
-    */
+    //end
     return 0;
 }
