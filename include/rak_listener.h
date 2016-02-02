@@ -187,8 +187,8 @@ public:
         
     //open connection
     void open(unsigned short port,
-              double time_out,
-              int maximumIncomingConnections);
+              double timeout,
+              int maximum_incoming_connections);
     //close connection
     void close();
     //safe close
@@ -267,6 +267,8 @@ protected:
     UID m_uid_generator{ 0 };
     //new id
     UID new_uid();
+    //time out
+    long m_timeout { 0 };
     //send uid to client
     void send_uid(client& client);
     //callback all onMessage

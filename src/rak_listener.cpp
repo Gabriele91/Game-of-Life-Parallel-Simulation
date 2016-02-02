@@ -11,13 +11,20 @@
 #define DEBUG_MESSAGE(x) std::cout << x << std::endl;
 #define DEBUG_CODE(x) x
 //using namespace
-void server_listener::open(unsigned short port, double timeOut, int maximumIncomingConnections)
+void server_listener::open(unsigned short port, double timeout, int maximum_incoming_connections)
 {
     close();
     m_peer = RakNet::RakPeerInterface::GetInstance();
     RakNet::SocketDescriptor sd(port, 0);
-	m_peer->Startup(maximumIncomingConnections, &sd, 1);
-	m_peer->SetMaximumIncomingConnections(maximumIncomingConnections);
+	m_peer->Startup(maximum_incoming_connections, &sd, 1);
+	m_peer->SetMaximumIncomingConnections(maximum_incoming_connections);
+    //save timeout
+    m_timeout = timeout;
+    //applay
+    for(auto client:m_clients)
+    {
+        m_peer->SetTimeoutTime((RakNet::TimeMS)m_timeout, client.second.m_address);
+    }
 }
 //number of connections
 int server_listener::get_maximum_incoming_connections() const
@@ -53,6 +60,8 @@ server_listener::UID server_listener::add_new_client(server_listener::system_add
     UID uid = new_uid();
     //push new client
     m_clients[uid] = client{ uid, address, nullptr, nullptr };
+    //set timeout
+    if(m_peer) m_peer->SetTimeoutTime((RakNet::TimeMS)m_timeout, address);
     //return uid
     return uid;
 }
@@ -266,7 +275,16 @@ bool client_listener::connect(const std::string& addrServer,unsigned short port,
     //address
     m_address.SetBinaryAddress((addrServer+":"+std::to_string(port)).c_str());
     //connection
-    auto res=m_peer->Connect(addrServer.c_str(), port, 0, 0);
+    auto res=m_peer->Connect(addrServer.c_str(),//const char *host,
+                             port,              //unsigned short remotePort,
+                             0,                 //const char * 	passwordData,
+                             0,                 //int 	passwordDataLength,
+                             0,                 //PublicKey * 	publicKey = 0,
+                             0,                 //unsigned 	connectionSocketIndex = 0,
+                             12,                //unsigned 	sendConnectionAttemptCount = 12,
+                             500,               //unsigned 	timeBetweenSendConnectionAttemptsMS = 500,
+                             timeOut            //RakNet::TimeMS timeoutTime = 0
+                             );
     m_connected = (res == RakNet::CONNECTION_ATTEMPT_STARTED);
     //return status
     return m_connected;

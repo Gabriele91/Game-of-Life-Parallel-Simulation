@@ -57,13 +57,19 @@ public:
     using clients_grid_map = std::unordered_map< UID, client_grid >;
     
     server_gol() { }
-    server_gol(const grid::point_g& cluster_size,const grid::point_g&  n_rows_columns, bool circle = false)
+    server_gol(const grid::point_g& cluster_size,
+               const grid::point_g&  n_rows_columns,
+               size_t n_steps = 0,
+               bool circle = false)
     {
-        init_cluster(cluster_size, n_rows_columns,circle);
+        init_cluster(cluster_size, n_rows_columns,n_steps,circle);
     }
     
     
-    void init_cluster(const grid::point_g& cluster_size,const grid::point_g& n_rows_columns,bool circle = false)
+    void init_cluster(const grid::point_g& cluster_size,
+                      const grid::point_g& n_rows_columns,
+                      size_t n_steps,
+                      bool circle = false)
     {
         //is a MCD
         assert((cluster_size.x % n_rows_columns.x)==0);
@@ -73,6 +79,8 @@ public:
                            cluster_size.y / n_rows_columns.y);
         //number of clients
         m_max_clients  = static_cast<int>(n_rows_columns.x*n_rows_columns.y);
+        //count steps
+        m_n_steps = n_steps;
         //uid
 		UID uid { 0 };
         
@@ -396,7 +404,7 @@ public:
                     break;
                 case S_SEND_UPDATE:
                     //if ...
-                    if(m_global_time > 4*24) break;
+                    if(m_global_time >= m_n_steps) break;
                     //next time stemp
                     ++m_global_time;
                     //send to all
@@ -447,6 +455,7 @@ private:
     int                   m_max_clients      { 0      };
     int                   m_msg_init         { 0      };
     bool                  m_circle           { false  };
+    size_t                m_n_steps          { 0      };
     clients_grid_map      m_clients_grid_map;
     
 };

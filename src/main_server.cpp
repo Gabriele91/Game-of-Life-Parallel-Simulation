@@ -47,7 +47,8 @@ int main(int argc, const char * argv[])
             cluster["clients"][0].int_value(),
             cluster["clients"][1].int_value(),
         },
-        cluster["cicle"].bool_value()
+        (size_t)cluster["steps"].int_value(),
+                cluster["cicle"].bool_value()
     };
     server.open(json_object["port"].int_value() ,
                 json_object["time"].int_value() );
