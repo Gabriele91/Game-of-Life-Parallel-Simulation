@@ -37,6 +37,8 @@
 /* Begin PBXFileReference section */
 		E021842C1C5CB031005B3FC6 /* Simulazione-Server */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Simulazione-Server"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E055C1BC1C5FA28800D48D64 /* modulo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = modulo.h; sourceTree = "<group>"; };
+		E06552021C60E02E00E58D8B /* json11.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = json11.hpp; sourceTree = "<group>"; };
+		E06552031C60E03F00E58D8B /* libjson11.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libjson11.a; sourceTree = "<group>"; };
 		E094CFDD1C5CFFF700732362 /* main_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_server.cpp; sourceTree = "<group>"; };
 		E094CFDE1C5CFFF700732362 /* rak_listener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rak_listener.cpp; sourceTree = "<group>"; };
 		E094CFE21C5CFFFE00732362 /* grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = grid.h; sourceTree = "<group>"; };
@@ -286,6 +288,7 @@
 		E094D0841C5D013700732362 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				E06552021C60E02E00E58D8B /* json11.hpp */,
 				E094D0851C5D013700732362 /* RakNet */,
 			);
 			path = include;
@@ -455,6 +458,7 @@
 		E094D1BD1C5D018F00732362 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				E06552031C60E03F00E58D8B /* libjson11.a */,
 				E094D1BE1C5D018F00732362 /* libRakNetLibStatic.a */,
 				E094D1BF1C5D018F00732362 /* libRakNetLibStatic_D.a */,
 			);
@@ -642,7 +646,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/dependencies/osx/lib",
 				);
-				OTHER_LDFLAGS = "-lRakNetLibStatic_D";
+				OTHER_LDFLAGS = (
+					"-lRakNetLibStatic_D",
+					"-llibjson11",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -658,7 +665,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/dependencies/osx/lib",
 				);
-				OTHER_LDFLAGS = "-lRakNetLibStatic";
+				OTHER_LDFLAGS = (
+					"-lRakNetLibStatic",
+					"-llibjson11",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -674,7 +684,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/dependencies/osx/lib",
 				);
-				OTHER_LDFLAGS = "-lRakNetLibStatic_D";
+				OTHER_LDFLAGS = (
+					"-lRakNetLibStatic_D",
+					"-llibjson11",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -690,7 +703,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/dependencies/osx/lib",
 				);
-				OTHER_LDFLAGS = "-lRakNetLibStatic";
+				OTHER_LDFLAGS = (
+					"-lRakNetLibStatic",
+					"-llibjson11",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
