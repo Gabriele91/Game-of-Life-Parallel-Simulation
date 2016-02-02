@@ -54,19 +54,26 @@ public:
                 //get info
                 msg.get(m_info_gird);
                 msg.get(m_filter);
-            }
-            break;
-            case T_MSG_START:
                 //init grid
                 m_grid = std::unique_ptr<grid>(new grid(m_info_gird.m_pos,
                                                         m_info_gird.m_size));
-                //i'm 1?
-                if(get_uid()==1)
+                //have state?
+                bool have_state0 = false;
+                msg.get(have_state0);
+                //..
+                if(have_state0)
                 {
-                                               m_grid->global({1,0}) = 1;
-                                                                          m_grid->global({2,1}) = 1;
-                    m_grid->global({0,2}) = 1; m_grid->global({1,2}) = 1; m_grid->global({2,2}) = 1;
+                    grid::point_g pos;
+                    grid::point_g size;
+                    grid::matrix  state0 = get_grid_message(msg, pos, size);
+                    m_grid->put_state(state0, pos, size);
                 }
+            }
+            break;
+            case T_MSG_START:
+                //enable loop
+                m_start = true;
+                //
             break;
             case T_MSG_UPDATE:
             {
@@ -145,18 +152,21 @@ public:
     
     void this_update()
     {
-        if(m_grid.get())
+        if(m_start)
         {
-            if(m_grid->time()==35)
+            if(m_grid.get())
             {
-                MESSAGE("...");
+                if(m_grid->time()==35)
+                {
+                    MESSAGE("...");
+                }
+                m_grid->update();
+                MESSAGE(m_grid->to_string_borders(true))
             }
-            m_grid->update();
-            MESSAGE(m_grid->to_string_borders(true))
-        }
-        else
-        {
-            assert(0);
+            else
+            {
+                assert(0);
+            }
         }
     }
     
@@ -171,7 +181,8 @@ public:
     }
 
 protected:
-    bool                    m_loop{ true };
+    bool                    m_start{ false };
+    bool                    m_loop { true };
     unsigned char           m_filter;
     grid_in_cluster         m_info_gird;
     std::unique_ptr< grid > m_grid{ nullptr };

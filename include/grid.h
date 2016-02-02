@@ -150,6 +150,21 @@ public:
         }
     }
 
+    void put_state(const matrix& matrix,const point_g& pos,const point_g& size)
+    {
+        for(grid::point_g::type y=0; y!=size.y; ++y )
+        for(grid::point_g::type x=0; x!=size.x; ++x )
+        {
+            //get position
+            point_g this_pos( x+pos.x,y+pos.y );
+            //put value
+            if(is_inside(this_pos))
+            {
+                global(this_pos) = matrix[y][x];
+            }
+        }
+    }
+    
 	void go_to(time_g new_time)
 	{
 		if (new_time < m_time) go_back(new_time);

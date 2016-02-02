@@ -39,6 +39,47 @@ ASPACKED(struct grid_in_cluster
     grid::point_g m_size;
 });
 
+inline void build_grid_message(byte_vector_stream & stream_vector,
+                               const grid::matrix & mat_grid,
+                               const grid::point_g& pos,
+                               const grid::point_g& size)
+{
+    //push
+    stream_vector.add(pos);
+    stream_vector.add(size);
+    //for all
+    for(grid::point_g::type y=0; y!=size.y; ++y )
+    for(grid::point_g::type x=0; x!=size.x; ++x )
+    {
+        stream_vector.add(mat_grid[y+pos.y][x+pos.x]);
+    }
+}
+inline grid::matrix get_grid_message(byte_vector_stream& stream_vector,
+                                     grid::point_g& pos,
+                                     grid::point_g& size)
+{
+    //push
+    stream_vector.get(pos);
+    stream_vector.get(size);
+    //alloc
+    grid::matrix mat_grid;
+    //alloc rows
+    mat_grid.resize( size.y );
+    //alloc colunm
+    for(size_t row = 0 ; row != size.y; ++row)
+    {
+        mat_grid[row].resize( size.x );
+    }
+    //for all
+    for(grid::point_g::type y=0; y!=size.y; ++y )
+    for(grid::point_g::type x=0; x!=size.x; ++x )
+    {
+        stream_vector.get(mat_grid[y][x]);
+    }
+    //return
+    return std::move(mat_grid);
+}
+
 inline void get_history_message(byte_vector_stream& stream_vector,
                                 grid::time_g& time,
                                 grid::edges_history& edges_history)

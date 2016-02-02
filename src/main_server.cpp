@@ -13,6 +13,27 @@
 #include <server_gol.h>
 #include <json11.hpp>
 
+inline grid::matrix get_state(const json11::Json::array& j_state0)
+{
+    //get matrix
+    grid::matrix g_state0;
+    //add rows
+    for( auto& j_row : j_state0 )
+    {
+        //add row
+        grid::row row;
+        //for all
+        for( auto& j_value : j_row.array_items() )
+        {
+            row.push_back(j_value.int_value());
+        }
+        //...
+        g_state0.push_back(row);
+    }
+    //return
+    return std::move(g_state0);
+}
+
 int main(int argc, const char * argv[])
 {
     
@@ -50,6 +71,9 @@ int main(int argc, const char * argv[])
         (size_t)cluster["steps"].int_value(),
                 cluster["cicle"].bool_value()
     };
+    //state 0
+    server.set_state0(get_state(cluster["state0"].array_items()));
+    //set state
     server.open(json_object["port"].int_value() ,
                 json_object["time"].int_value() );
     server.loop();

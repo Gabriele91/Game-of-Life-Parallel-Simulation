@@ -65,6 +65,10 @@ public:
         init_cluster(cluster_size, n_rows_columns,n_steps,circle);
     }
     
+    void set_state0(const grid::matrix& state)
+    {
+        m_state0 = state;
+    }
     
     void init_cluster(const grid::point_g& cluster_size,
                       const grid::point_g& n_rows_columns,
@@ -229,6 +233,17 @@ public:
         init_message.add(T_MSG_INIT);
         init_message.add(info.grid_in_cluster);
         init_message.add(info.filter());
+        //flag
+        bool have_state0 = m_state0.size();
+        //have state 0?
+        init_message.add(have_state0);
+        //push true/false
+        if(have_state0)
+        build_grid_message(init_message,
+                           m_state0,
+                           info.grid_in_cluster.m_pos,
+                           info.grid_in_cluster.m_size);
+        //...
         send(client.m_uid,init_message);
         //inc count inits
         ++m_msg_init;
@@ -448,6 +463,7 @@ public:
     }
     
 private:
+    grid::matrix          m_state0;
     clients_ack_map       m_clients_ack;
     grid::point_g         m_cluster_size;
     grid::time_g          m_global_time      { 0      };
