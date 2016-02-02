@@ -372,6 +372,8 @@ public:
                 get_history_message(msg, time, edges_history);
                 //applay circle
                 if(m_circle) cirlce_edges_history(edges_history);
+                //count clients
+                m_clients_ack[client.m_uid] = true;
                 //sent to ...
                 MESSAGE( "from: "<< client.m_uid )
                 if(send_to(info.m_top, time, edges_history, grid::TOP))       m_clients_ack[info.m_top]    = false;
@@ -383,8 +385,7 @@ public:
                 if(send_to(info.m_right_top,   time, edges_history, grid::TOP|grid::RIGHT,true))    m_clients_ack[info.m_right_top]     = false;
                 if(send_to(info.m_left_bottom, time, edges_history, grid::BOTTOM|grid::LEFT,true))  m_clients_ack[info.m_left_bottom]   = false;
                 if(send_to(info.m_right_bottom,time, edges_history, grid::BOTTOM|grid::RIGHT,true)) m_clients_ack[info.m_right_bottom]  = false;
-                //count clients
-                m_clients_ack[client.m_uid] = true;
+
             }
             break;
             default: assert(0); break;
