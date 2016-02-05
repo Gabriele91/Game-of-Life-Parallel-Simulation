@@ -33,12 +33,24 @@
     <ClInclude Include="..\include\server_gol.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\file_os.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\grid_json.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\modulo.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\rak_listener.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\main_client.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\file_os.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

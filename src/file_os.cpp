@@ -8,6 +8,13 @@
 #include <file_os.h>
 #include <sys/stat.h>
 
+#if defined(_WIN32)
+	#include <direct.h>
+	#define mkdir(x,y) _mkdir(x) 
+	#define S_ISDIR(ST_MODE) (((ST_MODE)& S_IFMT) == S_IFDIR)
+    #define S_ISREG(ST_MODE) (((ST_MODE)& S_IFMT) == S_IFREG)
+#endif
+
 bool save_string(const std::string& text,const std::string& path)
 {
     //..
