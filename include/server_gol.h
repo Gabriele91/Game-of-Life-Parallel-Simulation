@@ -93,6 +93,75 @@ public:
         m_state0 = state;
     }
     
+    class uid_cluster_grid
+    {
+        
+        using uid_row    = std::vector < UID >;
+        using uid_matrix = std::vector < uid_row >;
+        
+    public:
+        
+        uid_cluster_grid(){}
+        uid_cluster_grid(const grid::point_g& size,
+                         bool enable_circle = false)
+        {
+            init(size,enable_circle);
+        }
+        
+        void init(const grid::point_g& size,
+                  bool enable_circle = false)
+        {
+            m_size          = size;
+            m_enable_circle = enable_circle;
+            //uid counter
+            UID uid = 0;
+            //alloc ..
+            m_matrix.resize(size.y);
+            //
+            for(grid::point_g::type y = 0; y!=size.y; ++y)
+            {
+                //alloc
+                m_matrix[y].resize(size.x);
+                //init values
+                for(grid::point_g::type x = 0; x!=size.x; ++x)
+                {
+                    m_matrix[y][x] = ++uid;
+                }
+            }
+        }
+        
+        UID operator () (grid::point_g::type  x,grid::point_g::type  y) const
+        {
+            return operator[]({x,y});
+        }
+        
+        UID operator [] (const grid::point_g& pos) const
+        {
+            if(m_enable_circle)
+            {
+                grid::point_g::type x = positive::mod(pos.x, m_size.x);
+                grid::point_g::type y = positive::mod(pos.y, m_size.y);
+                //return cirlce uid
+                return m_matrix[y][x];
+            }
+            else if(pos.x < 0 ||
+                    pos.y < 0 ||
+                    pos.x >= m_size.x ||
+                    pos.y >= m_size.y)
+            {
+                return -1;
+            }
+            
+            return m_matrix[pos.y][pos.x];
+        }
+        
+    
+    private:
+        bool          m_enable_circle { false };
+        uid_matrix    m_matrix;
+        grid::point_g m_size;
+    };
+    
     void init_cluster(const grid::point_g& cluster_size,
                       const grid::point_g& n_rows_columns,
                       size_t n_steps,
@@ -108,60 +177,14 @@ public:
         m_max_clients  = static_cast<int>(n_rows_columns.x*n_rows_columns.y);
         //count steps
         m_n_steps = n_steps;
-        //uid
-		UID uid { 0 };
+        //init uid grid
+        uid_cluster_grid uid_grid ( n_rows_columns, circle );
+        //get uids
         
         for(grid::point_g::type y = 0; y != n_rows_columns.y; ++y)
         for(grid::point_g::type x = 0; x != n_rows_columns.x; ++x)
         {
-            
-            grid::point_g::type t_startx = (y-1)*n_rows_columns.x;
-            grid::point_g::type t_endx   = (y  )*n_rows_columns.x;
-            
-            grid::point_g::type startx   = y    *n_rows_columns.x;
-            grid::point_g::type   endx   = (y+1)*n_rows_columns.x;
-            
-            grid::point_g::type b_startx = (y+1)*n_rows_columns.x;
-            grid::point_g::type b_endx   = (y+2)*n_rows_columns.x;
-            
-            grid::point_g::type cell_left         = uid - 1;
-            grid::point_g::type cell_right        = uid + 1;
-            grid::point_g::type cell_top          = uid - n_rows_columns.x;
-            grid::point_g::type cell_bottom       = uid + n_rows_columns.x;
-            grid::point_g::type cell_left_top     = cell_top - 1;
-            grid::point_g::type cell_right_top    = cell_top + 1;
-            grid::point_g::type cell_left_bottom  = cell_bottom - 1;
-            grid::point_g::type cell_right_bottom = cell_bottom + 1;
-            
-            //top
-            if(cell_left_top  < t_startx || cell_left_top  >= t_endx) cell_left_top  = -1;
-            if(cell_top       < t_startx || cell_top       >= t_endx) cell_top       = -1;
-            if(cell_right_top < t_startx || cell_right_top >= t_endx) cell_right_top = -1;
-            
-            if(t_endx<=0)
-            {
-                cell_left_top  = -1;
-                cell_top       = -1;
-                cell_right_top = -1;
-            }
-            
-            //mid
-            if(cell_left  < startx || cell_left  >= endx) cell_left  = -1;
-            if(cell_right < startx || cell_right >= endx) cell_right = -1;
-            
-            //bottom
-            if(cell_left_bottom  < b_startx || cell_left_bottom  >= b_endx) cell_left_bottom  = -1;
-            if(cell_bottom       < b_startx || cell_bottom       >= b_endx) cell_bottom       = -1;
-            if(cell_right_bottom < b_startx || cell_right_bottom >= b_endx) cell_right_bottom = -1;
-            
-            if(b_startx >= m_max_clients)
-            {
-                cell_left_bottom  = -1;
-                cell_bottom       = -1;
-                cell_right_bottom = -1;
-            }
-            
-            m_clients_grid_map[ ++uid ] =
+            m_clients_grid_map[ uid_grid(x,y) ] =
             client_grid
             {
                 grid_in_cluster
@@ -169,67 +192,16 @@ public:
                     grid::point_g(x*size.x,y*size.y),
                     grid::point_g(size)
                 },
-                static_cast<UID>(cell_left),
-                static_cast<UID>(cell_right),
-                static_cast<UID>(cell_top),
-                static_cast<UID>(cell_bottom),
+                static_cast<UID>(uid_grid(x-1,y)),
+                static_cast<UID>(uid_grid(x+1,y)),
+                static_cast<UID>(uid_grid(x,y-1)),
+                static_cast<UID>(uid_grid(x,y+1)),
                 //cornes
-                static_cast<UID>(cell_left_top),
-                static_cast<UID>(cell_right_top),
-                static_cast<UID>(cell_left_bottom),
-                static_cast<UID>(cell_right_bottom)
+                static_cast<UID>(uid_grid(x-1,y-1)),
+                static_cast<UID>(uid_grid(x+1,y-1)),
+                static_cast<UID>(uid_grid(x-1,y+1)),
+                static_cast<UID>(uid_grid(x+1,y+1))
             };
-        }
-        //create cicle
-        if(circle)
-        {
-            //..
-            for(auto& it:m_clients_grid_map)
-            {
-                const long uid = (long)it.first-1;
-                //w
-                const long   w = n_rows_columns.x;
-                //h
-                const long   h = n_rows_columns.y;
-                //y
-                const long   y = uid / w;
-                //
-                grid::point_g::type startx   =     y * n_rows_columns.x;
-                grid::point_g::type   endx   = (y+1) * n_rows_columns.x -1;
-                //
-                if(it.second.m_left   < 0) it.second.m_left   = endx;
-                if(it.second.m_right  < 0) it.second.m_right  = startx;
-                //x
-                const long  x = uid % w;
-                //
-                grid::point_g::type starty   = x;
-                grid::point_g::type   endy   = x + (h-1) * n_rows_columns.x;
-                //..
-                if(it.second.m_top    < 0) it.second.m_top    = endy;
-                if(it.second.m_bottom < 0) it.second.m_bottom = starty;
-
-            }
-            //bottom left uid
-            long uid_b_left =  1+ (n_rows_columns.y-1) *  n_rows_columns.x;
-            //...
-            //circle borders
-            m_clients_grid_map[1]               .m_left_top     = m_max_clients    -1;
-            m_clients_grid_map[n_rows_columns.x].m_right_top    = uid_b_left       -1;
-            m_clients_grid_map[uid_b_left]      .m_left_bottom  = n_rows_columns.x -1;
-            m_clients_grid_map[m_max_clients]   .m_right_bottom = 0;
-
-        }
-        //correction, uid start from 1, not 0.
-        for(auto& it:m_clients_grid_map)
-        {
-            if(it.second.m_left >= 0)         it.second.m_left+=1;
-            if(it.second.m_right >= 0)        it.second.m_right+=1;
-            if(it.second.m_top >= 0)          it.second.m_top+=1;
-            if(it.second.m_bottom >= 0)       it.second.m_bottom+=1;
-            if(it.second.m_left_top >= 0)     it.second.m_left_top+=1;
-            if(it.second.m_right_top >= 0)    it.second.m_right_top+=1;
-            if(it.second.m_left_bottom >= 0)  it.second.m_left_bottom+=1;
-            if(it.second.m_right_bottom >= 0) it.second.m_right_bottom+=1;
         }
         //init global time
         m_global_time  = 0;
@@ -241,6 +213,8 @@ public:
         m_cluster_size = cluster_size;
         //is cicle
         m_circle = circle;
+        //debug output
+        //print_client_grid_all();
     }
     
     void open(unsigned short port, double time_out)
@@ -615,6 +589,42 @@ public:
         }
         //return result saved...
         return true;
+    }
+    
+    
+    void print_client_grid_all() const
+    {
+        for(UID uid = 1; uid <= m_clients_grid_map.size(); ++uid)
+        {
+            print_client_grid(uid);
+            MESSAGE( "" );
+        }
+    }
+    
+    void print_client_grid(UID uid) const
+    {
+        //get grid
+        const client_grid& c_grid = m_clients_grid_map.find(uid)->second;
+        //print..
+        printf("\t-\t-\t-\t-\t-\n"
+               "\t%d\t|\t%d\t|\t%d\t\n"
+               "\t-\t-\t-\t-\t-\n"
+               "\t%d\t|\t%d\t|\t%d\t\n"
+               "\t-\t-\t-\t-\t-\t\n"
+               "\t%d\t|\t%d\t|\t%d\t\n"
+               "\t-\t-\t-\t-\t-\n"
+               ,c_grid.m_left_top
+               ,c_grid.m_top
+               ,c_grid.m_right_top
+               
+               ,c_grid.m_left
+               ,uid
+               ,c_grid.m_right
+               
+               ,c_grid.m_left_bottom
+               ,c_grid.m_bottom
+               ,c_grid.m_right_bottom);
+        
     }
     
 private:
