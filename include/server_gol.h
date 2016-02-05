@@ -16,6 +16,8 @@
 #include <modulo.h>
 #include <rak_listener.h>
 #include <messages.h>
+#include <grid_json.h>
+#include <file_os.h>
 
 class server_gol : server_listener
 {
@@ -26,6 +28,7 @@ public:
         S_WAIT,
         S_SEND_UPDATE,
         S_ACK_UPDATE,
+        S_WAIT_RES,
         S_END
     };
     
@@ -56,12 +59,32 @@ public:
     using clients_ack_map  = std::map< UID, bool >;
     using clients_grid_map = std::unordered_map< UID, client_grid >;
     
+    struct client_res
+    {
+        bool m_arrived { false };
+        grid m_grid;
+        
+        client_res()
+        {
+        }
+        
+        client_res(bool arrived,const grid& l_grid)
+        {
+            m_arrived = arrived;
+            m_grid    = l_grid;
+        }
+    };
+    
+    using clients_grid_res = std::unordered_map< UID, client_res >;
+    
     server_gol() { }
-    server_gol(const grid::point_g& cluster_size,
+    server_gol(const std::string& path,
+               const grid::point_g&  cluster_size,
                const grid::point_g&  n_rows_columns,
                size_t n_steps = 0,
                bool circle = false)
     {
+        m_path = path;
         init_cluster(cluster_size, n_rows_columns,n_steps,circle);
     }
     
@@ -210,6 +233,8 @@ public:
         }
         //init global time
         m_global_time  = 0;
+        //save rows and columns
+        m_n_rows_columns = n_rows_columns;
         //init acks map
         m_clients_ack  = clients_ack_map();
         //save cluster size
@@ -262,9 +287,9 @@ public:
 			//no messages?
 			if (!edges_history_filtered.m_edges_actions.size()) return false;
 			//message
-			byte_vector_stream message;
-			//put type
-			message.add(T_MSG_EDGES);
+            byte_vector_stream message;
+            //put type
+            message.add(T_MSG_EDGES);
 			//message buffer
 			build_history_message(message, time, edges_history_filtered);
 			//send
@@ -274,7 +299,12 @@ public:
 				case grid::BOTTOM: MESSAGE("send time: " << time << " to BOTTOM"); break;
 				case grid::LEFT:   MESSAGE("send time: " << time << " to LEFT");   break;
 				case grid::RIGHT:  MESSAGE("send time: " << time << " to RIGHT");  break;
-				default: break;
+                default:
+                    if( filter == (grid::TOP|grid::LEFT))     {  MESSAGE("send time: " << time << " to TOP-LEFT"); }
+                    if( filter == (grid::TOP|grid::RIGHT))    {  MESSAGE("send time: " << time << " to TOP-RIGHT"); }
+                    if( filter == (grid::BOTTOM|grid::LEFT))  {  MESSAGE("send time: " << time << " to BOTTOM-LEFT"); }
+                    if( filter == (grid::BOTTOM|grid::RIGHT)) {  MESSAGE("send time: " << time << " to BOTTOM-RIGHT"); }
+                break;
 			}
 			send(uid, message);
             //is sended
@@ -322,7 +352,8 @@ public:
             //push case: pos == pos or pos.x == pos.y or pos.y ==pos.y
             new_messages.push_back(new_action);
             //other messages
-            if(position != edge_position)
+            if(position.x != edge_position.x &&
+               position.y != edge_position.y)
             {
                 //...
                 grid::point_g new_pos = position;
@@ -372,20 +403,48 @@ public:
                 get_history_message(msg, time, edges_history);
                 //applay circle
                 if(m_circle) cirlce_edges_history(edges_history);
-                //count clients
-                m_clients_ack[client.m_uid] = true;
                 //sent to ...
                 MESSAGE( "from: "<< client.m_uid )
-                if(send_to(info.m_top, time, edges_history, grid::TOP))       m_clients_ack[info.m_top]    = false;
-                if(send_to(info.m_bottom, time, edges_history, grid::BOTTOM)) m_clients_ack[info.m_bottom] = false;
-                if(send_to(info.m_left, time, edges_history, grid::LEFT))     m_clients_ack[info.m_left]   = false;
-                if(send_to(info.m_right, time, edges_history, grid::RIGHT))   m_clients_ack[info.m_right]  = false;
+                //
+                send_to(info.m_top, time, edges_history, grid::TOP);
+                send_to(info.m_bottom, time, edges_history, grid::BOTTOM);
+                send_to(info.m_left, time, edges_history, grid::LEFT);
+                send_to(info.m_right, time, edges_history, grid::RIGHT);
                 //cornes
-                if(send_to(info.m_left_top,    time, edges_history, grid::TOP|grid::LEFT,true))     m_clients_ack[info.m_left_top]      = false;
-                if(send_to(info.m_right_top,   time, edges_history, grid::TOP|grid::RIGHT,true))    m_clients_ack[info.m_right_top]     = false;
-                if(send_to(info.m_left_bottom, time, edges_history, grid::BOTTOM|grid::LEFT,true))  m_clients_ack[info.m_left_bottom]   = false;
-                if(send_to(info.m_right_bottom,time, edges_history, grid::BOTTOM|grid::RIGHT,true)) m_clients_ack[info.m_right_bottom]  = false;
-
+                send_to(info.m_left_top,    time, edges_history, grid::TOP   |grid::LEFT,true);
+                send_to(info.m_right_top,   time, edges_history, grid::TOP   |grid::RIGHT,true);
+                send_to(info.m_left_bottom, time, edges_history, grid::BOTTOM|grid::LEFT,true);
+                send_to(info.m_right_bottom,time, edges_history, grid::BOTTOM|grid::RIGHT,true);
+                //send  end
+                byte_vector_stream message;
+                //put type
+                message.add(T_MSG_END_EDGES);
+                //end
+                send(client.m_uid, message);
+            }
+            break;
+            case T_MSG_GET_RESULT:
+            {
+                //read message
+                m_clients_res_map[client.m_uid] =
+                client_res
+                (
+                    true,
+                    get_grid_and_history(msg)
+                 );
+                MESSAGE("---------------------------------------------------------------");
+                MESSAGE(client.m_uid);
+                MESSAGE("---------------------------------------------------------------");
+                //print res
+                for(grid::time_g time = 1; time != m_global_time + 1; ++time)
+                {
+                    //...
+                    m_clients_res_map[client.m_uid].m_grid.go_to(time);
+                    //...
+                    MESSAGE(m_clients_res_map[client.m_uid].m_grid.to_string_borders())
+                }
+                MESSAGE("---------------------------------------------------------------");
+                MESSAGE("---------------------------------------------------------------");
             }
             break;
             default: assert(0); break;
@@ -420,7 +479,22 @@ public:
                     break;
                 case S_SEND_UPDATE:
                     //if ...
-                    if(m_global_time >= m_n_steps) break;
+                    if(m_global_time >= m_n_steps)
+                    {
+                        for(auto& l_client : m_clients)
+                        {
+                            m_clients_res_map[l_client.first].m_arrived = false;
+                            //send "get res"
+                            byte_vector_stream stream;
+                            stream.add(T_MSG_SEND_RESULT);
+                            send(l_client.first,stream);
+                            //..
+                        }
+                        //change state
+                        m_server_state = S_WAIT_RES;
+                        //break
+                        break;
+                    }
                     //next time stemp
                     ++m_global_time;
                     //send to all
@@ -451,6 +525,27 @@ public:
                     }
                     //..
                     break;
+                case S_WAIT_RES:
+                {
+                    //do end?
+                    bool b_end = true;
+                    //all res
+                    for(auto& m_res : m_clients_res_map)
+                    {
+                        if(!m_res.second.m_arrived)
+                        {
+                            b_end = false;
+                            break;
+                        }
+                    }
+                    //else end
+                    if(b_end)
+                    {
+                        save_all_res(m_path);
+                        m_server_state = S_END;
+                    }
+                }
+                break;
                 default: assert(0); break;
             }
             //update raknet
@@ -463,9 +558,70 @@ public:
         }
     }
     
+    bool save_all_res(const std::string& path)
+    {
+        //create ouput dir
+        if(!create_dir(path, 0664))
+        {
+            MESSAGE("Can't crate directory: " << path);
+            return false;
+        }
+        //build outputs
+        for(auto it : m_clients_res_map)
+        {
+            //client path
+            std::string client_path = path+"/"+std::to_string(it.first);
+            //make dir
+            if(!create_dir(client_path, 664))
+            {
+                MESSAGE("Can't crate directory: " << client_path);
+                return false;
+            }
+            //for all times
+            for(grid::time_g time = 1; time != m_global_time + 1; ++time)
+            {
+                json11::Json json;
+                json11::Json::object jobject;
+                //apply temp
+                it.second.m_grid.go_to(time);
+                //serialize
+                jobject["data"]=get_jarray_relative_col(it.second.m_grid.get_matrix());
+                json = jobject;
+                //save
+                std::string time_path = client_path + "/" + std::to_string(time-1) + ".json";
+                //..
+                if(!save_string(json.dump(), time_path))
+                {
+                    MESSAGE("Can't save file: " << time_path);
+                    return false;
+                }
+            }
+        }
+        //create conf file
+        std::string path_conf = path +"/conf.json";
+        json11::Json::object jobject;
+        jobject["cols"] = (int)m_cluster_size.x;
+        jobject["rows"] = (int)m_cluster_size.y;
+        jobject["steps"] = (int)m_global_time - 1;
+        jobject["workers_x_column"] = (int)m_n_rows_columns.x;
+        jobject["workers_x_row"] = (int)m_n_rows_columns.y;
+        //append
+        json11::Json json = jobject;
+        //..
+        if(!save_string(json.dump(), path_conf))
+        {
+            MESSAGE("Can't save file: " << path_conf);
+            return false;
+        }
+        //return result saved...
+        return true;
+    }
+    
 private:
+    std::string           m_path;
     grid::matrix          m_state0;
     clients_ack_map       m_clients_ack;
+    grid::point_g         m_n_rows_columns;
     grid::point_g         m_cluster_size;
     grid::time_g          m_global_time      { 0      };
     state                 m_server_state     { S_WAIT };
@@ -474,6 +630,7 @@ private:
     bool                  m_circle           { false  };
     size_t                m_n_steps          { 0      };
     clients_grid_map      m_clients_grid_map;
+    clients_grid_res      m_clients_res_map;
     
 };
 

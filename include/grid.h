@@ -112,21 +112,28 @@ public:
         edges_actions m_edges_actions;
 		edges_history applay_filter(unsigned char filter,bool equals = false) const
 		{
-			edges_history output;
-			output.m_edges = m_edges & filter;
+            edges_history output;
+            if(equals) output.m_edges = m_edges & filter;
+            else       output.m_edges = filter;
 
 			//applay filter..
 			if (output.m_edges)
 			{
 				for (auto& edge_action : m_edges_actions)
                 {
-					if (!equals && edge_action.m_edge & output.m_edges)
-					{
-						output.m_edges_actions.push_back(edge_action);
-					}
-                    else if (equals && edge_action.m_edge == output.m_edges)
+                    if(equals)
                     {
-                        output.m_edges_actions.push_back(edge_action);
+                        if (edge_action.m_edge == filter)
+                        {
+                            output.m_edges_actions.push_back(edge_action);
+                        }
+                    }
+                    else
+                    {
+                        if (edge_action.m_edge & filter)
+                        {
+                            output.m_edges_actions.push_back(edge_action);
+                        }
                     }
                 }
 			}
@@ -135,6 +142,12 @@ public:
 		}
     };
     
+    //default constructor
+    grid()
+    {
+    }
+    
+    //else...
     grid(const point_g& position,
          const point_g& size)
     {
@@ -149,20 +162,20 @@ public:
             m_matrix[row].resize( m_size.x +2 );
         }
     }
-
-    void put_state(const matrix& matrix,const point_g& pos,const point_g& size)
+    
+    const matrix& get_matrix() const
     {
-        for(grid::point_g::type y=0; y!=size.y; ++y )
-        for(grid::point_g::type x=0; x!=size.x; ++x )
-        {
-            //get position
-            point_g this_pos( x+pos.x,y+pos.y );
-            //put value
-            if(is_inside(this_pos))
-            {
-                global(this_pos) = matrix[y][x];
-            }
-        }
+        return m_matrix;
+    }
+    
+    const history& get_history() const
+    {
+        return m_history;
+    }
+    
+    history& get_history()
+    {
+        return m_history;
     }
     
 	void go_to(time_g new_time)
@@ -222,52 +235,31 @@ public:
         m_time = b_time;
     }
     
-    actions applay_history_edges(time_g time,const edges_history& history)
+    void applay_history_edges(const edges_history& history)
     {
         //save diff
-        actions old_actions = m_history[time];
-        //go back
-        go_to(time-1);
+        actions old_actions = m_history[m_time];
         //add history
         for(auto& action : history.m_edges_actions)
         {
-            if(is_inside_borders(action.m_action.m_position))
+            //if(is_inside_borders(action.m_action.m_position))
+            if(is_inside(action.m_action.m_position))
             {
-                m_history[time][action.m_action.m_position] = action.m_action;
+                m_history[m_time][action.m_action.m_position] = action.m_action;
             }
             else
             {
+            #if 0
                 //assert(0);
 				std::cout 
 					<< "wrong: " 
 					<< action.m_action.m_position.to_string() 
 					<< std::endl;
+            #endif
             }
         }
-        //update..
-        update();
-        //save new states
-        const actions& new_actions = m_history[time];
-        //update..
-        actions output;
-        //for all actions
-        for(auto it_new_action : new_actions)
-        {
-            //search
-            auto it_old_action = old_actions.find(it_new_action.first);
-            //1 - not exists
-            if(it_old_action == old_actions.end())
-            {
-                output[it_new_action.first] = it_new_action.second;
-            }
-            //are diff
-            else if(it_old_action->second != it_new_action.second)
-            {
-                output[it_new_action.first] = it_new_action.second;
-            }
-        }
-        //output borders
-        return output;
+        //applay
+        applay_new(m_time);
     }
     
     edges_history get_last_history_edges(unsigned char filter = ALL)
@@ -345,12 +337,56 @@ public:
 		applay_new(m_time);
 	}
 
+    void put_state(const matrix& matrix,const point_g& pos,const point_g& size)
+    {
+        //count inc
+        ++m_time;
+        //get
+#if 1
+        actions& l_actions=m_history[m_time];
+#else
+        actions l_actions;
+#endif
+        //
+        for(point_g::type y = 0; y != m_size.y; ++y)
+        {
+            for(point_g::type x = 0; x != m_size.x; ++x)
+            {
+                //next state
+                point_g relative = point_g(x,y);
+                point_g point    = m_position + relative;
+                value    next    = matrix[relative.y][relative.x];
+                //add action?
+                if(next != global(point))
+                {
+                    l_actions[point]=
+                    action
+                    {
+                        point,
+                        global(point),
+                        next
+                    };
+                }
+            }
+        }
+#if 0
+        m_history[m_time]=l_actions;
+#endif
+        //applay
+        applay_new(m_time);
+    }
+    
+    
     void next()
     {
         //count inc
         ++m_time;
         //get
+#if 1
         actions& l_actions=m_history[m_time];
+#else
+        actions l_actions;
+#endif
         //
         for(point_g::type y = 0; y != m_size.y; ++y)
         for(point_g::type x = 0; x != m_size.x; ++x)
@@ -370,6 +406,9 @@ public:
                 };
             }
         }
+#if 0
+        m_history[m_time]=l_actions;
+#endif
     }
     
     time_g time() const
@@ -467,7 +506,11 @@ public:
             for(point_g::type x = 0; x != m_size.x; ++x)
             {
                 point_g position = m_position+point_g(x,y);
-                outstring       += std::to_string(global(position)) +" ";
+                #if 0
+                outstring += std::to_string(global(position)) + " ";
+                #else
+                outstring += std::string(local(point_g(x, y))? "*" : " ");
+                #endif
             }
             outstring += "\n";
         }
@@ -501,7 +544,11 @@ public:
             
             for(point_g::type x = 0; x != m_size.x+2; ++x)
             {
-                outstring       += std::to_string(local(point_g(x, y))) + (x==0 || x==m_size.x ? "|" : " ");
+            #if 0
+                outstring += std::to_string(local(point_g(x, y))) + (x==0 || x==m_size.x ? "|" : " ");
+            #else
+                outstring += std::string(local(point_g(x, y))? "*" : " ") + (x==0 || x==m_size.x ? "|" : " ");
+            #endif
             }
             
             if(y == 0) outstring += "\n" + line_to_string_borders();

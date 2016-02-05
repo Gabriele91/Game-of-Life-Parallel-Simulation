@@ -11,6 +11,8 @@
 		E094CFE01C5CFFF700732362 /* rak_listener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094CFDE1C5CFFF700732362 /* rak_listener.cpp */; };
 		E094D1C61C5D1D3300732362 /* rak_listener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094CFDE1C5CFFF700732362 /* rak_listener.cpp */; };
 		E094D1D01C5D1D7B00732362 /* main_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094D1CE1C5D1D7600732362 /* main_client.cpp */; };
+		E09D43581C639E0C00069CC7 /* file_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E074B8AC1C638E7500EBC2D8 /* file_os.cpp */; };
+		E09D43591C639E0D00069CC7 /* file_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E074B8AC1C638E7500EBC2D8 /* file_os.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +43,9 @@
 		E06552031C60E03F00E58D8B /* libjson11.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libjson11.a; sourceTree = "<group>"; };
 		E06552051C60E57E00E58D8B /* client.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = client.json; sourceTree = "<group>"; };
 		E06552061C60E57E00E58D8B /* server.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = server.json; sourceTree = "<group>"; };
+		E074B8AA1C638CB700EBC2D8 /* grid_json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = grid_json.h; sourceTree = "<group>"; };
+		E074B8AB1C638E5C00EBC2D8 /* file_os.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = file_os.h; sourceTree = "<group>"; };
+		E074B8AC1C638E7500EBC2D8 /* file_os.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_os.cpp; sourceTree = "<group>"; };
 		E094CFDD1C5CFFF700732362 /* main_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_server.cpp; sourceTree = "<group>"; };
 		E094CFDE1C5CFFF700732362 /* rak_listener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rak_listener.cpp; sourceTree = "<group>"; };
 		E094CFE21C5CFFFE00732362 /* grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = grid.h; sourceTree = "<group>"; };
@@ -262,6 +267,7 @@
 				E094CFDD1C5CFFF700732362 /* main_server.cpp */,
 				E094D1CE1C5D1D7600732362 /* main_client.cpp */,
 				E094CFDE1C5CFFF700732362 /* rak_listener.cpp */,
+				E074B8AC1C638E7500EBC2D8 /* file_os.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -276,6 +282,8 @@
 				E094D1D11C5D1E0600732362 /* client_gol.h */,
 				E094D1C31C5D134100732362 /* messages.h */,
 				E055C1BC1C5FA28800D48D64 /* modulo.h */,
+				E074B8AA1C638CB700EBC2D8 /* grid_json.h */,
+				E074B8AB1C638E5C00EBC2D8 /* file_os.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -551,6 +559,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E09D43581C639E0C00069CC7 /* file_os.cpp in Sources */,
 				E094CFE01C5CFFF700732362 /* rak_listener.cpp in Sources */,
 				E094CFDF1C5CFFF700732362 /* main_server.cpp in Sources */,
 			);
@@ -560,6 +569,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E09D43591C639E0D00069CC7 /* file_os.cpp in Sources */,
 				E094D1C61C5D1D3300732362 /* rak_listener.cpp in Sources */,
 				E094D1D01C5D1D7B00732362 /* main_client.cpp in Sources */,
 			);

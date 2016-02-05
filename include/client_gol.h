@@ -68,6 +68,14 @@ public:
                     grid::matrix  state0 = get_grid_message(msg, pos, size);
                     m_grid->put_state(state0, pos, size);
                 }
+                else
+                {
+                    m_grid->update();
+                }
+                //first loop
+                m_not_firt_loop = false;
+                //
+                MESSAGE(m_grid->to_string_borders())
             }
             break;
             case T_MSG_START:
@@ -77,7 +85,12 @@ public:
             break;
             case T_MSG_UPDATE:
             {
-                this_update();
+                //
+                if(m_not_firt_loop)
+                    this_update();
+                else
+                    m_not_firt_loop = true;
+                //
                 send_last_time_history();
             }
             break;
@@ -90,18 +103,50 @@ public:
                 //read message
                 get_history_message(msg, time, edges_history);
                 //get ...
+                #if 0
                 MESSAGE(   "get time: " << time
                         << " UID: "     << get_uid()
                         << " actions: " << edges_history.m_edges_actions.size() );
-                //applay
-                grid::edges_history new_edges_history =
-                                    m_grid->get_history_edges(m_grid->applay_history_edges(time,
-                                                                                           edges_history),
-                                                              m_filter);
+                #endif
+                //get edge hitosry
+                m_grid->applay_history_edges(edges_history);
+            }
+            break;
+            case T_MSG_END_EDGES:
+            {
+                //build message
+                byte_vector_stream msg;
+                //send history
+                msg.add(T_MSG_ACK_UPDATE);
+                //send
+                send(msg);
                 //
-                //MESSAGE(m_grid->to_string_borders(true))
-                //update
-                send_history(m_grid->time(),new_edges_history);
+            }
+            break;
+            case T_MSG_SEND_RESULT:
+            {
+                //end time
+                grid::time_g end_time = m_grid->time();
+                //build message
+                byte_vector_stream msg;
+                //send history
+                msg.add(T_MSG_GET_RESULT);
+                //build
+                build_grid_and_history_message( msg, *m_grid, 1 );
+                //send
+                send(msg);
+                //end...
+                MESSAGE("--------------------------------------------------------")
+                MESSAGE("--------------------------------------------------------")
+                MESSAGE("--------------------------------------------------------")
+                //test print grid
+                for(grid::time_g time = 1; time <= end_time; ++time)
+                {
+                    //...
+                    m_grid->go_to(time);
+                    //...
+                    MESSAGE(m_grid->to_string_borders())
+                }
             }
             break;
             default: break;
@@ -124,10 +169,6 @@ public:
             msg.add(T_MSG_HISTORY);
             //add history
             build_history_message(msg,time,edges_history);
-            //send
-            MESSAGE(   "send time: " << time
-                    << " UID: "       << get_uid()
-                    << " actions: "   << edges_history.m_edges_actions.size() )
             //send
             send(msg);
         }
@@ -156,12 +197,8 @@ public:
         {
             if(m_grid.get())
             {
-                if(m_grid->time()==35)
-                {
-                    MESSAGE("...");
-                }
                 m_grid->update();
-                MESSAGE(m_grid->to_string_borders(true))
+                MESSAGE(m_grid->to_string_borders())
             }
             else
             {
@@ -181,6 +218,7 @@ public:
     }
 
 protected:
+    bool                    m_not_firt_loop { false };
     bool                    m_start{ false };
     bool                    m_loop { true };
     unsigned char           m_filter;
