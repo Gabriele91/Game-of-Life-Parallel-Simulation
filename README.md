@@ -3,13 +3,13 @@ The project have to simulate the "Game of life" in a grid where the workers comu
 
 ### Requirements:
 
-  - Visual Studio 2015
-  - Xcode
+  - Visual Studio 2015,
+  - Xcode.
 
 ### Dependencies:
 
-  - [Raknet](http://www.jenkinssoftware.com/index.old.html)
-  - [Json11](https://github.com/dropbox/json11)
+  - [Raknet](http://www.jenkinssoftware.com/index.old.html),
+  - [Json11](https://github.com/dropbox/json11).
 
 ### Limitations:
 
