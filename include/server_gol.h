@@ -18,6 +18,7 @@
 #include <messages.h>
 #include <grid_json.h>
 #include <file_os.h>
+#include <get_time.h>
 
 class server_gol : server_listener
 {
@@ -469,6 +470,8 @@ public:
                         //break
                         break;
                     }
+                    //append time
+                    m_times.push_back(get_time());
                     //next time stemp
                     ++m_global_time;
                     //send to all
@@ -579,6 +582,11 @@ public:
         jobject["steps"] = (int)m_global_time - 1;
         jobject["workers_x_column"] = (int)m_n_rows_columns.x;
         jobject["workers_x_row"] = (int)m_n_rows_columns.y;
+        jobject["time_elapsed"] = (m_times.size() ? ((m_times[m_times.size()-1])-(m_times[0])) : 0.0) / 1000.0;
+        //json times
+        json11::Json::array jarray_times;
+        for(double value:m_times) jarray_times.push_back(value / 1000.0);
+        jobject["times"] = jarray_times;
         //append
         json11::Json json = jobject;
         //..
@@ -628,6 +636,7 @@ public:
     }
     
 private:
+    std::vector <double>  m_times;
     std::string           m_path;
     grid::matrix          m_state0;
     clients_ack_map       m_clients_ack;

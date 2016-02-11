@@ -13,6 +13,7 @@
 		E094D1D01C5D1D7B00732362 /* main_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E094D1CE1C5D1D7600732362 /* main_client.cpp */; };
 		E09D43581C639E0C00069CC7 /* file_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E074B8AC1C638E7500EBC2D8 /* file_os.cpp */; };
 		E09D43591C639E0D00069CC7 /* file_os.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E074B8AC1C638E7500EBC2D8 /* file_os.cpp */; };
+		E0D0A64F1C6C7FAD00785018 /* get_time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E0D0A64E1C6C7FAC00785018 /* get_time.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,8 +42,6 @@
 		E055C1BC1C5FA28800D48D64 /* modulo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = modulo.h; sourceTree = "<group>"; };
 		E06552021C60E02E00E58D8B /* json11.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = json11.hpp; sourceTree = "<group>"; };
 		E06552031C60E03F00E58D8B /* libjson11.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libjson11.a; sourceTree = "<group>"; };
-		E06552051C60E57E00E58D8B /* client.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = client.json; sourceTree = "<group>"; };
-		E06552061C60E57E00E58D8B /* server.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = server.json; sourceTree = "<group>"; };
 		E074B8AA1C638CB700EBC2D8 /* grid_json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = grid_json.h; sourceTree = "<group>"; };
 		E074B8AB1C638E5C00EBC2D8 /* file_os.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = file_os.h; sourceTree = "<group>"; };
 		E074B8AC1C638E7500EBC2D8 /* file_os.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_os.cpp; sourceTree = "<group>"; };
@@ -212,6 +211,10 @@
 		E094D1CD1C5D1D3300732362 /* Simulazione-Client */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Simulazione-Client"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E094D1CE1C5D1D7600732362 /* main_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_client.cpp; sourceTree = "<group>"; };
 		E094D1D11C5D1E0600732362 /* client_gol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = client_gol.h; sourceTree = "<group>"; };
+		E0D0A64E1C6C7FAC00785018 /* get_time.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = get_time.cpp; sourceTree = "<group>"; };
+		E0D0A6501C6C7FB300785018 /* get_time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = get_time.h; sourceTree = "<group>"; };
+		E0D0A6571C6C830A00785018 /* client.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = client.json; sourceTree = "<group>"; };
+		E0D0A6581C6C830A00785018 /* server.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = server.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,7 +238,7 @@
 		E02184231C5CB031005B3FC6 = {
 			isa = PBXGroup;
 			children = (
-				E06552041C60E57E00E58D8B /* assets */,
+				E0D0A6541C6C82A400785018 /* assets */,
 				E094D0821C5D013700732362 /* dependencies */,
 				E094CFE11C5CFFFE00732362 /* include */,
 				E094CFDC1C5CFFF700732362 /* src */,
@@ -252,18 +255,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		E06552041C60E57E00E58D8B /* assets */ = {
-			isa = PBXGroup;
-			children = (
-				E06552051C60E57E00E58D8B /* client.json */,
-				E06552061C60E57E00E58D8B /* server.json */,
-			);
-			path = assets;
-			sourceTree = "<group>";
-		};
 		E094CFDC1C5CFFF700732362 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				E0D0A64E1C6C7FAC00785018 /* get_time.cpp */,
 				E094CFDD1C5CFFF700732362 /* main_server.cpp */,
 				E094D1CE1C5D1D7600732362 /* main_client.cpp */,
 				E094CFDE1C5CFFF700732362 /* rak_listener.cpp */,
@@ -275,6 +270,7 @@
 		E094CFE11C5CFFFE00732362 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				E0D0A6501C6C7FB300785018 /* get_time.h */,
 				E094CFE21C5CFFFE00732362 /* grid.h */,
 				E094CFE31C5CFFFE00732362 /* point.h */,
 				E094CFE41C5CFFFE00732362 /* rak_listener.h */,
@@ -485,6 +481,15 @@
 			path = lib;
 			sourceTree = "<group>";
 		};
+		E0D0A6541C6C82A400785018 /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				E0D0A6571C6C830A00785018 /* client.json */,
+				E0D0A6581C6C830A00785018 /* server.json */,
+			);
+			path = assets;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -562,6 +567,7 @@
 				E09D43581C639E0C00069CC7 /* file_os.cpp in Sources */,
 				E094CFE01C5CFFF700732362 /* rak_listener.cpp in Sources */,
 				E094CFDF1C5CFFF700732362 /* main_server.cpp in Sources */,
+				E0D0A64F1C6C7FAD00785018 /* get_time.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
