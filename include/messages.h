@@ -12,9 +12,11 @@
 #include <iostream>
 #include <grid.h>
 #include <grid.h>
-
-#define MESSAGE(x) std::cout << x << std::endl;
-
+#if defined(DEBUG) || defined(_DEBUG)
+    #define MESSAGE(x) std::cout << x << std::endl;
+#else
+    #define MESSAGE(x)
+#endif
 #ifdef _MSC_VER
     #define ASPACKED( __Declaration__ ) __pragma( pack(push,1) ) __Declaration__   __pragma( pack(pop) )
 	#define MSLEEP(x) Sleep(x)
@@ -33,7 +35,8 @@ enum type_msg
     T_MSG_ACK_UPDATE,
     T_MSG_HISTORY,
     T_MSG_SEND_RESULT,
-    T_MSG_GET_RESULT
+    T_MSG_GET_RESULT,
+    T_MSG_SAY_GOOD_BYE
 };
 
 ASPACKED(struct grid_in_cluster

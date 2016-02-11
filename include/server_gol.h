@@ -91,7 +91,31 @@ public:
     
     void set_state0(const grid::matrix& state)
     {
-        m_state0 = state;
+        if(state.size()    == m_state0.size() &&
+           state[0].size() == m_state0[0].size())
+        {
+            m_state0 = state;
+            return;
+        }
+        //else
+        m_state0.resize(m_cluster_size.y);
+        //alloc
+        for(size_t row = 0 ; row != m_cluster_size.y; ++row)
+            m_state0[row].resize(m_cluster_size.x);
+        //for all
+        for(size_t y = 0 ; y != m_cluster_size.y; ++y)
+        {
+            //copy values
+            for(size_t x=0;
+                y < state.size() &&
+                x < state[y].size() &&
+                x < m_cluster_size.x;
+              ++x)
+            {
+                m_state0[y][x] = state[y][x];
+            }
+        }
+        
     }
     
     class uid_cluster_grid
@@ -528,11 +552,22 @@ public:
             //update raknet
             update();
         }
+        //send good bye
+        for(auto& l_client : m_clients)
+        {
+            byte_vector_stream stream;
+            stream.add(T_MSG_SAY_GOOD_BYE);
+            send(l_client.first,stream);
+        }
+        //update raknet
+        update();
         //good bye
         for(auto& client_grid : m_clients_grid_map)
         {
             close_client_connection(client_grid.first);
         }
+        //update raknet
+        update();
     }
     
     bool save_all_res(const std::string& path)
@@ -585,7 +620,7 @@ public:
         jobject["time_elapsed"] = (m_times.size() ? ((m_times[m_times.size()-1])-(m_times[0])) : 0.0) / 1000.0;
         //json times
         json11::Json::array jarray_times;
-        for(double value:m_times) jarray_times.push_back(value / 1000.0);
+        for(double value:m_times) jarray_times.push_back((value - m_times[0])/ 1000.0);
         jobject["times"] = jarray_times;
         //append
         json11::Json json = jobject;

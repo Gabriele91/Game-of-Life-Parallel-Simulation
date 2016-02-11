@@ -149,6 +149,11 @@ public:
                 }
             }
             break;
+            case T_MSG_SAY_GOOD_BYE:
+                //close loop
+                m_loop = false;
+                //..
+            break;
             default: break;
         }
     }
