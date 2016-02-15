@@ -615,8 +615,13 @@ public:
         jobject["cols"] = (int)m_cluster_size.x;
         jobject["rows"] = (int)m_cluster_size.y;
         jobject["steps"] = (int)m_global_time - 1;
+#if 0
         jobject["workers_x_column"] = (int)m_n_rows_columns.x;
         jobject["workers_x_row"] = (int)m_n_rows_columns.y;
+#else
+        jobject["workers_x_column"] = (int)m_n_rows_columns.y;
+        jobject["workers_x_row"] = (int)m_n_rows_columns.x;
+#endif
         jobject["time_elapsed"] = (m_times.size() ? ((m_times[m_times.size()-1])-(m_times[0])) : 0.0) / 1000.0;
         //json times
         json11::Json::array jarray_times;
